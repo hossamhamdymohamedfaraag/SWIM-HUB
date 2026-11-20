@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Swim Hub</title>
+<meta name="application-name" content="Swim Hub">
+<meta name="apple-mobile-web-app-title" content="Swim Hub">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a2a47">
+<meta name="description" content="Swim Hub: season planning, workouts, distances by training zone and swimmer tracking for swim coaches.">
+<style>
+:root{--bg:#f2f5f9;--card:#fff;--tx:#0f1b2a;--mu:#66768a;--nv:#0a2a47;--bl:#1760a5;--sk:#38a6e0;--gr:#e9eef3;--bd:#d9e1e9;--bad:#c0392b;--sh:0 1px 2px rgba(10,42,71,.06),0 4px 14px rgba(10,42,71,.06);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b131b;--card:#14202b;--tx:#e7eef5;--mu:#8da0b3;--nv:#0a2239;--bl:#5aaeea;--sk:#5cc0f2;--gr:#1e2c39;--bd:#25354a;--bad:#ff7b6b;--sh:0 1px 2px rgba(0,0,0,.3);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b131b;--card:#14202b;--tx:#e7eef5;--mu:#8da0b3;--nv:#0a2239;--bl:#5aaeea;--sk:#5cc0f2;--gr:#1e2c39;--bd:#25354a;--bad:#ff7b6b;--sh:0 1px 2px rgba(0,0,0,.3);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--nv);z-index:10}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--nv);z-index:5;padding:12px 14px 0}
+.bar{display:flex;justify-content:space-between;align-items:center;min-height:40px}
+#ttl{color:#fff;font-weight:700;font-size:16px;letter-spacing:.2px}
+#burger{width:42px;height:42px;border:0;background:rgba(255,255,255,.1);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
+#burger i{display:block;width:20px;height:2px;background:#fff;border-radius:1px;transition:.2s}
+#burger.open i:nth-child(1){transform:translateY(7px) rotate(45deg)}
+#burger.open i:nth-child(2){opacity:0}
+#burger.open i:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mb{position:fixed;inset:0;z-index:6;background:rgba(10,34,57,.28)}
+.mp{position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 62px);z-index:7;background:var(--card);border:1px solid var(--bd);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);min-width:220px;padding:6px;display:flex;flex-direction:column}
+.mi{background:none;border:0;border-left:3px solid transparent;text-align:left;padding:12px 14px;border-radius:8px;color:var(--tx);font:inherit;font-weight:600}
+.mi.on{border-left-color:var(--sk);background:var(--gr);color:var(--bl)}
+.hero{min-height:calc(100vh - 120px);min-height:calc(100dvh - 120px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 10px}
+.hn{font-size:clamp(40px,12vw,76px);line-height:1.05;margin:0;color:var(--tx);font-weight:300;letter-spacing:-.02em}
+.hn b{font-weight:800}
+.hl{width:64px;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--bl),var(--sk));margin:22px 0 18px}
+.hs{margin:0;max-width:440px;color:var(--mu);font-size:clamp(14px,3.6vw,17px);line-height:1.6}
+main{padding:14px;max-width:920px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:var(--sh)}
+h2{font-size:12px;margin:0 0 12px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+h3{font-size:12px;margin:18px 0 10px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+label{display:block;font-size:12px;color:var(--mu);margin-bottom:4px;font-weight:600}
+input,select,textarea{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font:inherit;min-width:0}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--sk);outline-offset:-1px}
+button{font:inherit;cursor:pointer}
+.pri,.sec,.dng,.ok,.rd{border-radius:8px;padding:9px 14px;font-weight:600;margin:10px 8px 0 0}
+.pri{background:var(--bl);color:#fff;border:1px solid var(--bl)}
+.sec{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.dng{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+.x{background:none;border:0;color:var(--mu);font-size:17px;padding:2px 8px}
+.x:disabled{opacity:.3;cursor:default}
+.sa{display:flex;gap:6px;align-items:center;margin-top:8px}
+.sa select{width:auto;flex:1;max-width:260px;padding:6px 8px;font-size:13px}
+.mu{color:var(--mu);font-size:12px}
+.lk{background:none;border:1px dashed var(--bd);color:var(--bl);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600}
+details{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin-bottom:10px;box-shadow:var(--sh)}
+summary{padding:13px 14px;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:8px;cursor:pointer}
+summary::-webkit-details-marker{display:none}
+.days{padding:0 12px 12px;display:grid;gap:10px}
+.day{border:1px solid var(--bd);border-radius:10px;padding:10px}
+.dh{display:flex;justify-content:space-between;margin-bottom:8px}
+.en{display:flex;gap:6px;margin-bottom:6px;align-items:center}
+.en select{flex:2}.en input{flex:1}
+.wk{border-bottom:1px solid var(--bd);padding:6px 2px;font-size:14px}
+.zn{font-weight:700;letter-spacing:.02em}
+.grp{background:var(--card);border:1.5px solid var(--bd);border-radius:14px;margin-bottom:16px;box-shadow:var(--sh);overflow:hidden}
+.gbar{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;padding:12px 14px;background:var(--gr);border-bottom:1.5px solid var(--bd)}
+.gname{flex:1;min-width:150px}.grd{width:78px}
+.gname input{font-weight:700;font-size:16px}
+.gtot{font-weight:700;color:var(--bl);padding-bottom:9px;white-space:nowrap}
+.ctl{display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.dng.sm{margin:0;padding:6px 10px;font-size:12px;background:#d93025;border-color:#d93025;color:#fff}
+.rd{background:#d93025;border:1px solid #d93025;color:#fff}
+.tri2{display:flex;gap:8px;margin-top:10px;align-items:stretch;flex-wrap:nowrap}
+.tri2 button{flex:1;margin:0;padding:10px 6px;font-size:13px;line-height:1.25}
+.ok{background:#1e8e5a;border:1px solid #1e8e5a;color:#fff}
+.gfoot .ok{margin:0;padding:10px 14px}
+.mvs{width:auto;max-width:132px;padding:5px 6px;font-size:12px}
+.sh{flex-wrap:wrap}
+.ib{width:34px;height:34px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;font-size:16px;line-height:1;padding:0}
+.ib:disabled{opacity:.35;cursor:default}
+.mnu{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--bd)}
+.mnu select{width:auto;flex:1;min-width:150px}
+.mnu .pri,.mnu .sec,.mnu .dng{margin:0;padding:7px 12px;font-size:13px}
+.gsets{padding:12px;display:grid;gap:12px}
+.set{border:1.5px solid var(--bd);border-left:4px solid var(--sk);border-radius:10px;background:var(--card);overflow:hidden}
+.sh{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 12px;border-bottom:1px solid var(--bd);background:var(--bg)}
+.sn{font-weight:700;font-size:13px}.stt{color:var(--mu);font-size:12px}
+.sb{padding:10px 12px 12px}
+.addset{display:block;width:calc(100% - 24px);margin:0 12px 12px;border:1.5px dashed var(--bd);background:none;color:var(--bl);padding:10px;border-radius:10px;font-weight:600}
+.gfoot{display:flex;gap:8px;padding:0 12px 12px;flex-wrap:wrap;align-items:center}
+.gfoot .addset{flex:1;min-width:110px;width:auto;margin:0}
+.gfoot .sec,.gfoot .dng{margin:0;padding:10px 14px}
+.addgrp{display:block;width:100%;border:1.5px dashed var(--bl);background:none;color:var(--bl);padding:12px;border-radius:12px;font-weight:700;margin-bottom:14px}
+.wt{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--mu);font-weight:600}.wt b{font-size:24px;color:var(--bl)}
+.sr{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:8px}
+.st{display:flex;gap:4px}.st button{width:36px;border:0;border-radius:8px;background:var(--bl);color:#fff;font-size:18px}
+.st input{text-align:center}
+.tm{display:flex;gap:4px;align-items:center}
+.gh{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px}
+.sc{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}
+th,td{border-bottom:1px solid var(--bd);padding:8px 6px;text-align:center;white-space:nowrap}
+th{color:var(--mu);font-weight:700;font-size:12px}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.kp div{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;font-size:12px;color:var(--mu);font-weight:600;box-shadow:var(--sh)}
+.kp b{display:block;font-size:22px;color:var(--bl);margin-top:2px}
+.br{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13px}
+.br span:first-child{width:128px;font-weight:600}.br span:last-child{width:72px;text-align:right}
+.br i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--bl),var(--sk))}
+.br div{flex:1;background:var(--gr);border-radius:5px}
+.out{background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:var(--sh)}
+.out.sel{border-color:var(--sk);box-shadow:0 0 0 2px var(--sk)}
+.oh{background:linear-gradient(135deg,var(--nv),var(--bl));color:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center}
+.ot{font-size:18px;font-weight:700}.od{opacity:.85;font-size:13px;margin-top:2px}.om{font-size:28px;font-weight:700}.om small{font-size:13px;margin-left:3px;font-weight:600}
+.ogh{background:var(--gr);padding:9px 16px;display:flex;justify-content:space-between;font-weight:700;font-size:13px}
+.os{padding:11px 16px;border-bottom:1px solid var(--bd)}
+.osr{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.osm{font-size:17px;font-weight:700;min-width:104px}
+.tt{color:var(--bl);font-weight:700}
+.sm{margin-left:auto;color:var(--mu);font-size:12px}
+.on{color:var(--mu);font-size:13px;margin-top:4px;white-space:pre-wrap}
+.oa{padding:4px 12px 14px;display:flex;gap:2px;flex-wrap:wrap;align-items:center}
+.ed{border-left:4px solid var(--sk)}
+.sbar{display:flex;gap:2px;flex-wrap:wrap;margin-bottom:8px}
+.ios{background:#f2f2f7;color:#000;max-width:1100px;margin:0 auto 20px;border-radius:14px;padding:18px 16px 20px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif}
+.ilb{font-size:10px;font-weight:700;letter-spacing:.18em;color:#8e8e93}
+.itt{font-size:28px;font-weight:700;letter-spacing:-.01em;margin-top:6px}
+.isub{font-size:13px;color:#8e8e93;margin-top:2px}
+.ist{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-radius:10px;margin:14px 0 8px}
+.ist div{padding:10px 14px;border-right:1px solid #e5e5ea}.ist div:last-child{border:0}
+.ist b{display:block;font-size:20px;font-weight:700}.ist span{font-size:11px;color:#8e8e93}
+.izs{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:11.5px;color:#3c3c43;margin:0 4px 4px}
+.isc{display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:#6c6c70;text-transform:uppercase;letter-spacing:.04em;padding:14px 6px 6px}
+.icd{background:#fff;border-radius:10px;overflow:hidden}
+.irw{display:grid;grid-template-columns:104px 76px minmax(0,1fr) auto auto;gap:2px 10px;align-items:baseline;padding:9px 14px;position:relative}
+.irw+.irw::before{content:"";position:absolute;top:0;left:14px;right:0;height:1px;background:#e5e5ea}
+.ir1{font-size:14.5px;font-weight:700}.ir2{font-size:12.5px;font-weight:600}.ir3{font-size:12px;color:#3c3c43;overflow-wrap:anywhere}.ir4{font-size:12.5px;font-weight:700;color:#1760a5}.ir5{font-size:12px;color:#8e8e93;text-align:right}
+.irn{grid-column:2/-1;font-size:11.5px;color:#6c6c70;white-space:pre-wrap;overflow-wrap:anywhere}
+@media (max-width:560px){.irw{grid-template-columns:88px 58px minmax(0,1fr) auto auto;gap:2px 6px;padding:8px 10px}.ir1{font-size:13.5px}.itt{font-size:24px}.ios{padding:14px 10px 16px}}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:#0a2a47;color:#fff;padding:11px 18px;border-radius:10px;z-index:20;font-size:14px;display:none;max-width:90%;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+@media (max-width:560px){.ist b{font-size:16px}.ist div{padding:8px 8px}}
+:root{--gr2:#d6dee7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--gr2:#2a3c4f}}
+:root[data-theme="dark"]{--gr2:#2a3c4f}
+.grp{background:var(--gr)}
+.gbar{background:var(--gr2)}
+.ib.up{background:#0a2a47;border-color:#0a2a47;color:#fff}
+.ib.dn{background:#a9dcf5;border-color:#a9dcf5;color:#0a2a47}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ib.up{border-color:#3b7fc0}}
+:root[data-theme="dark"] .ib.up{border-color:#3b7fc0}
+.ib.up,.ib.up:disabled{background:#0a2a47!important;opacity:1}
+.ib.dn,.ib.dn:disabled{background:#a9dcf5!important;opacity:1}
+.ib.up:disabled{color:rgba(255,255,255,.35);cursor:default}
+.ib.dn:disabled{color:rgba(10,42,71,.3);cursor:default}
+.pdfw{container-type:inline-size;width:min(100%,640px);margin:0 auto 20px}
+.pv{--u:1px;font-size:calc(var(--u)*10);line-height:1.25;background:#f2f2f7;color:#000;border-radius:1.2em;padding:2.7em 1.4em 2em;font-family:Helvetica,Arial,sans-serif;box-shadow:0 8px 30px rgba(10,42,71,.18)}
+@supports (width:1cqw){.pv{--u:.26316cqw}}
+.pv *{box-sizing:border-box}
+.pv-l{font-size:.75em;font-weight:700;color:#8e8e93;padding-left:.4em}
+.pv-t{font-size:2.2em;font-weight:700;margin:.45em 0 0 .18em;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-d{color:#8e8e93;margin:.5em 0 0 .4em}
+.pv-s{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-radius:.8em;margin-top:1.2em;height:4.8em;align-items:center}
+.pv-s div{padding:0 1em;border-left:1px solid #e5e5ea;line-height:1.1}
+.pv-s div:first-child{border:0}
+.pv-s b{display:block;font-size:1.4em;margin-bottom:.15em;white-space:nowrap}
+.pv-s span{font-size:.8em;color:#8e8e93}
+.pv-z{font-size:.85em;color:#3c3c43;margin:1.2em .4em 0;white-space:pre-wrap;line-height:1.35}
+.pv-g{display:flex;justify-content:space-between;font-size:.8em;font-weight:700;color:#8e8e93;text-transform:uppercase;padding:1.6em .5em .7em}
+.pv-c{background:#fff;border-radius:.8em;overflow:hidden}
+.pv-r{display:grid;grid-template-columns:8.2em 5em 8em 1fr auto;align-items:baseline;padding:.65em 1em .6em;position:relative}
+.pv-r+.pv-r::before{content:"";position:absolute;top:0;left:1em;right:0;height:1px;background:#e5e5ea}
+.pv-r .a{font-size:1.25em;font-weight:700;white-space:nowrap}
+.pv-r .b{font-weight:700;white-space:nowrap}
+.pv-r .c{font-size:.9em;color:#3c3c43;white-space:nowrap}
+.pv-r .d{font-weight:700;color:#1760a5;white-space:nowrap}
+.pv-r .e{font-size:.95em;color:#8e8e93;text-align:right;white-space:nowrap}
+.pv-r .n{grid-column:2/-1;font-size:.85em;color:#6c6c70;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:.3em}
+.teams{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;justify-content:center}
+.teams button{padding:14px 26px;border-radius:12px;border:1.5px solid var(--bl);background:transparent;color:var(--bl);font-weight:700;font-size:15px;min-width:150px}
+.teams button.on{background:var(--bl);color:#fff}
+.mtm{display:flex;gap:6px;padding:6px 6px 10px;border-bottom:1px solid var(--bd);margin-bottom:6px}
+.mt{flex:1;padding:9px 6px;border-radius:8px;border:1px solid var(--bd);background:none;color:var(--tx);font:inherit;font-weight:700;font-size:13px}
+.mt.on{background:var(--bl);color:#fff;border-color:var(--bl)}
+.rd2{grid-column:1/-1;display:flex;align-items:flex-end;gap:6px}
+.rd2 .f1{flex:1 1 0;min-width:0}.rd2 .f2{flex:1.3 1 0;min-width:0}
+.rd2 .x2{padding-bottom:9px;color:var(--mu);font-weight:700}
+.st.sm button{width:28px;font-size:16px}
+.st.sm input{padding:9px 4px;min-width:0}
+.grest{width:138px}
+.grest .tm input{padding:9px 4px}
+.gcon{display:flex;align-items:center;justify-content:center;gap:10px;margin:-6px 0 16px;color:var(--mu);font-size:12px;font-weight:600}
+.gcon .tm{width:128px}
+.gcon .tm input{padding:7px 4px}
+.os.rest{text-align:center;color:var(--mu);font-size:12px;padding:6px;background:var(--bg)}
+.pv-rest{text-align:center;font-size:.8em;font-style:italic;color:#8e8e93;padding:.4em 0;background:#f7f7fa;border-top:1px solid #e5e5ea;border-bottom:1px solid #e5e5ea}
+.pv-gr{text-align:center;font-size:.8em;font-style:italic;color:#8e8e93;padding:.9em 0 0}
+.gbar{display:block;padding:12px 14px 14px;background:linear-gradient(90deg,#08223b 0%,#0f4a80 55%,#38a6e0 100%);border-bottom:0;color:#fff}
+.gbar label{color:rgba(255,255,255,.88)}
+.gr1{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.gr2{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-top:10px}
+.gbar .gtot{margin-left:auto;color:#fff;font-weight:700;padding-bottom:9px}
+.gbar .ib{border-color:rgba(255,255,255,.75)}
+.grp label,.set label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+.gsets{padding:14px;gap:14px}
+.sr{grid-template-columns:.8fr 1fr 1.3fr 1.3fr;gap:10px 12px}
+@media (max-width:560px){.sr{grid-template-columns:1fr 1fr}.gr2{gap:10px}.gbar .gtot{width:100%;margin-left:0;padding-bottom:0}}
+.gridt{min-width:0;width:100%;table-layout:fixed;border-collapse:collapse}
+.gridt th{white-space:normal;font-size:10px;line-height:1.15;padding:6px 2px;overflow-wrap:anywhere;vertical-align:bottom}
+.gridt th.c1,.gridt td.c1{width:64px;text-align:left;padding-left:6px}
+.gridt td.c1{font-size:13px;line-height:1.2}
+.gridt td.g{height:40px;border:1px solid var(--bd);cursor:pointer;padding:0}
+.gridt td.g.on{background:var(--bl);border-color:var(--bl)}
+.gridt .days{padding:0}
+.gnote{padding:10px 12px 0}
+.pv-g{text-transform:none;gap:.8em}
+.pv-g>span:first-child{flex:1;min-width:0;overflow-wrap:anywhere}
+.pv-g>span:last-child{white-space:nowrap}
+.pv-g .u{text-transform:uppercase}
+.pv-g .pn{font-weight:400;text-transform:none;margin-left:.7em;color:#3c3c43}
+.pv-g .pn b{font-weight:700}
+.gridt td.g{height:auto;border:0;padding:4px 2px;cursor:pointer}
+.gridt tr+tr td{border-top:1px solid var(--bd)}
+.gridt .sq{width:100%;max-width:26px;aspect-ratio:1/1;margin:0 auto;border:1.5px solid #c3cdd8;border-radius:6px;background:var(--card)}
+.gridt .sq.on{background:var(--bl);border-color:var(--bl)}
+.card.wk{padding:10px 6px}
+.wtb{min-width:0;width:100%;border-collapse:collapse;font-size:11px}
+.wtb th{white-space:normal;font-size:9.5px;line-height:1.15;padding:5px 1px;overflow-wrap:anywhere;vertical-align:bottom}
+.wtb td{padding:6px 1px;white-space:nowrap}
+.wtb td.d1{text-align:left;padding-left:3px;line-height:1.2}
+.wtb td.d1 b{display:block;font-size:11px}
+.wtb td.d1 span{font-size:9.5px;color:var(--mu)}
+.ubox{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1.5px solid var(--bd);border-radius:10px;background:var(--bg);font-size:13px;font-weight:600}
+.ubox b{font-size:22px;color:var(--bl)}
+.card.wk h2{padding-bottom:8px;margin-bottom:6px;border-bottom:1.5px solid var(--bd)}
+.wtb th{border-bottom:1.5px solid var(--bd)}
+:root{--ln:#c3cdd8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ln:#3a4d61}}
+:root[data-theme="dark"]{--ln:#3a4d61}
+.gridt tr+tr td.g,.gridt tr+tr td.c1{border-top:1px solid var(--ln)}
+.gridt tr:last-child td.g,.gridt tr:last-child td.c1{border-bottom:1px solid var(--ln)}
+.utb{width:100%;min-width:0;table-layout:fixed;border-collapse:collapse}
+.utb th,.utb td{font-size:10px;font-weight:400;text-align:center;padding:5px 1px;border:1px solid var(--ln);overflow-wrap:anywhere;white-space:normal}
+.utb th{color:var(--mu);line-height:1.15;vertical-align:bottom}
+.utb td{font-size:11px;color:var(--tx)}
+.seg{display:flex;gap:6px;margin-bottom:12px}
+.seg button{flex:1;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font-weight:700}
+.seg button.on{background:var(--bl);color:#fff;border-color:var(--bl)}
+.swb{padding:0 12px 14px}
+.swf{display:grid;grid-template-columns:62px 1fr 76px 52px;gap:8px}
+.swf input{padding:8px 6px}
+.rrow{border:1px solid var(--bd);border-radius:10px;padding:8px;margin-bottom:8px;display:grid;grid-template-columns:1.3fr 1fr 30px;gap:6px;align-items:center}
+.rrow input{padding:7px 8px;font-size:13px}
+.rrow .r2{grid-column:1/-1;display:grid;grid-template-columns:1fr 1.4fr;gap:6px}
+.btb{width:100%;min-width:0;border-collapse:collapse;font-size:12px}
+.btb th{font-size:10px;color:var(--mu);text-align:left;padding:5px 3px;border-bottom:1.5px solid var(--bd)}
+.btb td{padding:6px 3px;vertical-align:top;border-top:1px solid var(--bd)}
+.chw{margin-top:14px}.cht{font-weight:700;font-size:13px;margin-bottom:2px}
+.ch{width:100%;height:auto;display:block}
+.ch text{fill:var(--mu);font-size:8px}
+.ch .g{stroke:var(--bd);stroke-width:1}
+.ch .ln{fill:none;stroke:var(--bl);stroke-width:2}
+.ch .pt{fill:var(--bl)}
+.ch .bst{fill:var(--card);stroke:var(--bl);stroke-width:2.5}
+.gridt .sq.did{background:#0a2a47;border-color:#0a2a47}
+.gridt .sq.on.did{background:#0a2a47;border-color:var(--sk);box-shadow:inset 0 0 0 3px var(--bl)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gridt .sq.did{background:#bfe3f7;border-color:#bfe3f7}:root:not([data-theme="light"]) .gridt .sq.on.did{background:#bfe3f7;border-color:var(--sk);box-shadow:inset 0 0 0 3px var(--bl)}}
+:root[data-theme="dark"] .gridt .sq.did{background:#bfe3f7;border-color:#bfe3f7}
+.bt{display:flex;gap:8px;align-items:center}
+#infob{display:none;width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(255,255,255,.75);background:transparent;color:#fff;font:italic 700 17px Georgia,serif;align-items:center;justify-content:center;padding:0}
+#infob.on{background:#fff;color:#0a2a47}
+.inf ul{margin:0;padding-left:18px}.inf li{margin-bottom:9px;font-size:13px;line-height:1.5}
+.lg{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+.lg.b{background:var(--bl)}.lg.n{background:#0a2a47}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lg.n{background:#bfe3f7}}
+:root[data-theme="dark"] .lg.n{background:#bfe3f7}
+:root{--nvl:#0a2a47}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--nvl:#4a86c5}}
+:root[data-theme="dark"]{--nvl:#4a86c5}
+.tb2{display:flex;gap:8px;margin-bottom:12px}.tb2 button{flex:1;margin:0}
+.sgh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 2px 8px;flex-wrap:wrap}
+.rrow{border:0;border-top:2px solid var(--nvl);border-radius:0;padding:10px 0 8px;margin-bottom:0;grid-template-columns:1.1fr 1.6fr 30px}
+.tbx{display:flex;align-items:center;gap:2px}
+.tbx input{padding:7px 2px;text-align:center;min-width:0;width:100%;font-size:13px}
+.btb.nv td{border-top:1.5px solid var(--nvl)}
+.home main{padding:0;max-width:none}
+.hm-hero{background:radial-gradient(120% 70% at 50% 0%,#1d6fb8 0%,rgba(29,111,184,0) 62%),linear-gradient(180deg,#0a2a47 0%,#0d3d6b 55%,#1760a5 100%);color:#fff;padding:34px 18px 60px;text-align:center;position:relative;overflow:hidden}
+.hm-hero::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:36px;background:var(--bg);border-radius:36px 36px 0 0}
+.hm-in{max-width:560px;margin:auto;position:relative;z-index:1}
+.hm-brand{font-size:clamp(46px,14vw,80px);font-weight:300;letter-spacing:-.025em;line-height:1}
+.hm-brand b{font-weight:800}
+.hm-line{width:56px;height:4px;border-radius:2px;background:linear-gradient(90deg,#38a6e0,#a9dcf5);margin:20px auto 16px}
+.hm-tag{font-size:clamp(16px,4.4vw,20px);font-weight:600;letter-spacing:.04em;margin:0 0 8px}
+.hm-desc{font-size:14px;line-height:1.65;opacity:.85;margin:0 auto;max-width:440px}
+.hm-teams{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}
+.hm-team{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.3);color:#fff;border-radius:16px;padding:16px 14px;text-align:left;font:inherit}
+.hm-team b{display:block;font-size:16px}
+.hm-team span{display:block;font-size:12px;opacity:.82;margin-top:4px;line-height:1.4}
+.hm-team i{display:block;margin-top:12px;font-style:normal;font-size:13px;font-weight:700;color:#a9dcf5}
+.hm-team.on{background:#fff;color:#0a2a47;border-color:#fff}.hm-team.on i{color:#1760a5}
+.hm-body{max-width:600px;margin:0 auto;padding:4px 16px 30px}
+.hm-body h3{margin:6px 0 12px}
+.hm-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.hm-tile{display:flex;gap:14px;align-items:center;text-align:left;width:100%;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;box-shadow:var(--sh);color:var(--tx);font:inherit}
+.hm-ic{flex:0 0 44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#0a2a47,#1760a5);color:#fff;display:flex;align-items:center;justify-content:center}
+.hm-ic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hm-tile b{display:block;font-size:15px}
+.hm-tile span{display:block;font-size:12.5px;color:var(--mu);margin-top:2px;line-height:1.4}
+.hm-tile em{margin-left:auto;font-style:normal;color:var(--mu);font-size:22px}
+.hm-foot{text-align:center;color:var(--mu);font-size:12px;margin-top:22px}
+@media (min-width:640px){.hm-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><div class="bar"><span id="ttl"></span><div class="bt"><button id="infob" data-a="info" aria-label="Page info">i</button><button id="burger" data-a="menu" aria-label="Menu"><i></i><i></i><i></i></button></div></div></header>
+<div id="menu"></div>
+<main id="m"></main>
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const ZN=["Rec.","EN1","EN2","EN3","SP1","SP2","SP3","Race Pace"],SK=["Free","Back","Breast","Butterfly","IM","MS","Choice"];
+const DN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const rid=()=>Math.random().toString(36).slice(2);
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const addDays=(s,n)=>{const d=new Date((s||today())+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
+const dow=s=>new Date(s+"T00:00:00Z").getUTCDay();
+const mon=s=>addDays(s,-((dow(s||today())+6)%7));
+const nw=()=>({days:Array.from({length:7},()=>({e:[{z:"",m:0}]}))});
+const ns=()=>({reps:0,dist:0,r:1,stroke:"Free",z:"EN1",tm:0,ts:0,note:""});
+const ng=n=>({n:"Group "+n,r:1,sets:[ns()]});
+const mkSt=()=>({name:"",champ:"",start:mon(today()),weeks:Array.from({length:8},nw),cur:{team:"",date:today(),groups:[ng(1)]},saved:[],lib:[],sid:rid(),seasons:[],sw:[]});
+const T={pre:mkSt(),comp:mkSt()},TN={pre:"Pre. Team",comp:"Compet. Team"};let team="comp",st=T[team];
+const PK=()=>({pre:T.pre,comp:T.comp,team});
+let tab="home",mo=false,view=null,trk="sw",opS=new Set(),lk="",qo=false,q={name:"",birth:""},ifo=false,vs=null,nsf=null,sf="cur",tm=null,op=new Set([0]),pend=null,mn=null,tmo=null,sel=new Set(),selW=new Set();
+const $=s=>document.querySelector(s),esc=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const getp=p=>p.split(".").reduce((o,k)=>o[k],st);
+function setp(p,v){const k=p.split("."),l=k.pop();k.reduce((o,x)=>o[x],st)[l]=v}
+function toast(m){const e=$("#toast");e.textContent=m;e.style.display="block";clearTimeout(tmo);tmo=setTimeout(()=>{e.style.display="none"},3500)}
+function save(){st.vs=vs;clearTimeout(tm);tm=setTimeout(async()=>{try{localStorage.setItem("swim2",JSON.stringify(PK()))}catch(e){}
+},500)}
+const opt=(l,s,ph)=>(ph?`<option value="">${ph}</option>`:"")+l.map(x=>`<option${x===s?" selected":""}>${x}</option>`).join("");
+const has=i=>st.weeks[i].days.some(d=>d.e.some(x=>x.z||x.m));
+const wtot=w=>w.days.reduce((a,d)=>a+d.e.reduce((b,x)=>b+(x.z?+x.m||0:0),0),0);
+const stot=s=>(+s.reps||0)*(+s.dist||0)*Math.max(1,+s.r||1),sct=x=>stot(x)+" m",slab=x=>{const r=Math.max(1,+x.r||1),b=(+x.reps||0)+" x "+(+x.dist||0);return r>1?r+"("+b+")":b};
+const secs=x=>(+x.tm||0)*60+(+x.ts||0),stsec=x=>(+x.reps||0)*secs(x)*Math.max(1,+x.r||1);
+const fdur=t=>{const h=Math.floor(t/3600),m=Math.floor(t%3600/60),c=t%60,p=n=>String(n).padStart(2,"0");return h?h+":"+p(m)+":"+p(c):m+":"+p(c)};
+const rr=g=>Math.max(1,+g.r||1),gbase=g=>g.sets.reduce((a,x)=>a+stot(x),0),gtot=g=>gbase(g)*rr(g),rsec=(m,c)=>(+m||0)*60+(+c||0),rtxt=(m,c)=>tstr({tm:m,ts:c}),gsec=g=>(g.sets.reduce((a,x)=>a+stsec(x),0)+Math.max(0,g.sets.length-1)*rsec(g.sm,g.ss))*rr(g),wsec=w=>w.groups.reduce((a,g,i)=>a+gsec(g)+(i<w.groups.length-1?rsec(g.gm,g.gs):0),0),wsum=w=>w.groups.reduce((a,g)=>a+gtot(g),0);
+const p24=v=>{v=String(v||"").trim().replace(".",":");let m=v.match(/^(\d{1,2}):?(\d{2})$/);if(!m){m=v.match(/^(\d{1,2})$/);if(m)m=[0,m[1],"00"]}if(!m)return null;const h=+m[1],n=+m[2];return h<24&&n<60?h*3600+n*60:null};
+const f24=t=>{t=((Math.round(t)%86400)+86400)%86400;const p=n=>String(n).padStart(2,"0");return p(Math.floor(t/3600))+":"+p(Math.floor(t%3600/60))+(t%60?":"+p(t%60):"")};
+const tline=w=>{const s0=p24(w.t0);if(s0==null)return null;let t=s0;return w.groups.map((g,i)=>{const gs=t,ge=t+gsec(g);t=ge;let ra=null;if(i<w.groups.length-1){const r=rsec(g.gm,g.gs);if(r){ra={s:t,e:t+r};t+=r}}return{s:gs,e:ge,ra}})};
+const tstr=s=>{const m=+s.tm||0,c=+s.ts||0;return m||c?m+":"+String(c).padStart(2,"0"):""};
+function unsync(){}
+function syncSeason(w){const n=Math.floor((Date.parse(w.date+"T00:00:00Z")-Date.parse(st.start+"T00:00:00Z"))/864e5);if(!(n>=0))return false;
+while(st.weeks.length*7<=n)st.weeks.push(nw());return true}
+function normStart(){const s=st.start||today(),sh=(dow(s)+6)%7;if(!sh){st.start=s;return}
+const flat=[];st.weeks.forEach(w=>w.days.forEach(d=>flat.push(d)));
+for(let i=0;i<sh;i++)flat.unshift({e:[{z:"",m:0}]});
+while(flat.length%7)flat.push({e:[{z:"",m:0}]});
+st.weeks=[];for(let i=0;i<flat.length;i+=7)st.weeks.push({days:flat.slice(i,i+7)});st.start=addDays(s,-sh)}
+function loadAll(j){const o=JSON.parse(j);if(o&&o.pre&&o.comp){T.pre=o.pre;T.comp=o.comp;if(TN[o.team])team=o.team}else if(o){T.comp=o;T.pre=mkSt()}st=T[team];vs=st.vs||null}
+function migrateAll(){["pre","comp"].forEach(k=>{st=T[k];migrate()});st=T[team];if(vs&&!st.seasons.find(x=>x.id===vs))vs=null}
+function migrate(){normStart();const fx=g=>{g.r=g.r||1;g.sets.forEach(x=>{if(x.z==="Warming/Cooling")x.z="Rec.";if(!ZN.includes(x.z))x.z="EN1"})};
+st.saved=st.saved||[];st.lib=st.lib||[];st.saved.forEach(w=>{if(!w.id)w.id=rid();w.groups.forEach(fx)});st.lib.forEach(fx);st.cur.groups.forEach(fx);
+st.weeks.forEach(wk=>wk.days.forEach(d=>{d.e=d.e.map(x=>({...x,z:x.z==="Warming/Cooling"?"Rec.":x.z})).filter(x=>!x.w&&(!x.z||ZN.includes(x.z))).map(x=>({z:x.z||""}));if(!d.e.length)d.e.push({z:""})}));
+st.sid=st.sid||rid();st.seasons=st.seasons||[];st.sw=st.sw||[];st.saved.forEach(w=>{if(!w.sid)w.sid=st.sid;if(w.sid===st.sid)syncSeason(w)})}
+const TT={home:"",season:"Season planning & analytics",work:"Create workout",saved:"Saved workout",lib:"Favourite sets",trk:"Swimmers tracking"};
+function renderMenu(){$("#menu").innerHTML=mo?`<div class="mb" data-a="mclose"></div><div class="mp"><div class="mtm">${["pre","comp"].map(k=>`<button class="mt${k===team?" on":""}" data-a="team" data-t="${k}">${TN[k]}</button>`).join("")}</div>${[["home","Home"],["season","Season planning &amp; analytics"],["work","Create workout"],["saved","Saved workout"],["lib","Favourite sets"],["trk","Swimmers tracking"]].map(([t,l])=>`<button class="mi${t===tab?" on":""}" data-a="tab" data-t="${t}">${l}</button>`).join("")}</div>`:"";$("#burger").classList.toggle("open",mo)}
+const HI={season:'<svg viewBox="0 0 24 24"><path d="M3 5h18v15H3z"/><path d="M3 9h18M8 3v4M16 3v4"/><path d="M8 17v-3M12 17v-5M16 17v-2"/></svg>',work:'<svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/><path d="M14 6l3 3"/></svg>',saved:'<svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',lib:'<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',trk:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.2c2.7.2 4.5 2 4.5 4.8"/></svg>'};
+const TD={pre:"Pre-competition swimmers",comp:"Competitive swimmers"};
+const HT=[["season","Season planning &amp; analytics","Plan the training zones by week and see the distances automatically."],["work","Create workout","Build workouts with groups, sets, rests and notes."],["saved","Saved workout","View, copy to a new date, or export as PDF."],["lib","Favourite sets","Save set groups and reuse them in any workout."],["trk","Swimmers tracking","Times, best marks and rankings for every stage."]];
+const vHome=()=>`<div class="hm"><section class="hm-hero"><div class="hm-in"><div class="hm-brand"><b>Swim</b> Hub</div><div class="hm-line"></div><p class="hm-tag">Plan. Train. Track.</p><p class="hm-desc">A training planner for swim coaches: plan the season by training zone, write and save workouts, see the distance of every zone, and track swimmers' times and rankings.</p><div class="hm-teams">${["pre","comp"].map(k=>`<button class="hm-team${k===team?" on":""}" data-a="team" data-t="${k}" data-go="1"><b>${TN[k]}</b><span>${TD[k]}</span><i>Open workspace →</i></button>`).join("")}</div></div></section><section class="hm-body"><h3>Everything in one place</h3><div class="hm-grid">${HT.map(([t,n,d])=>`<button class="hm-tile" data-a="tab" data-t="${t}"><div class="hm-ic">${HI[t]}</div><div><b>${n}</b><span>${d}</span></div><em>›</em></button>`).join("")}</div><div class="hm-foot">Swim Hub · each team keeps its own data</div></section></div>`;
+function render(){$("#ttl").textContent=tab==="home"?"":TN[team]+" · "+TT[tab];{const bd=document.body;if(bd&&bd.classList)bd.classList.toggle("home",tab==="home")}
+$("#m").innerHTML=(ifo&&tab!=="home"?infoHtml():"")+(tab==="home"?vHome():tab==="season"?vSeason():tab==="work"?vWork():tab==="saved"?vSaved():tab==="lib"?vGroups():tab==="trk"?vTrack():"");
+{const ib=$("#infob");ib.style.display=tab==="home"?"none":"inline-flex";ib.classList.toggle("on",ifo)}
+$("#m").querySelectorAll("input:not([type=date]),textarea").forEach(e=>{e.dir="ltr";e.lang="en"});$("#m").style.maxWidth=tab==="saved"&&view?"1100px":"";renderMenu()}
+const planZ=w=>ZN.filter(z=>w.days.some(d=>d.e.some(x=>x.z===z)));
+const zh=z=>z.replace("/","/<wbr>");
+const slabel=x=>(x.name||"Season")+" · "+(x.champ?x.champ:x.start+" to "+addDays(x.start,x.weeks.length*7-1));
+const curS=()=>(vs&&st.seasons.find(x=>x.id===vs))||st;
+function seasonBar(){const S=curS();
+let h=`<div class="card"><h2>Season</h2><div class="row"><div><label>Viewing</label><select data-vs><option value=""${S===st?" selected":""}>Current: ${esc(st.name||"this season")}</option>${st.seasons.map(x=>`<option value="${x.id}"${S===x?" selected":""}>${esc(slabel(x))}</option>`).join("")}</select></div></div>`;
+if(S!==st)h+=`<p class="mu">You are viewing a closed season (closed ${S.closed}). It is read-only.</p><button class="pri" data-a="vcur">Back to current season</button>`+(pend&&pend.a==="dsn"?`<span class="mu">Delete this season and its ${st.saved.filter(w=>w.sid===S.id).length} workouts? This cannot be undone.</span><button class="rd" data-a="dsn2">Yes, delete</button><button class="sec" data-a="cx">Cancel</button>`:`<button class="rd" data-a="dsn">Delete this season</button>`);
+else if(nsf)h+=`<p class="mu">The current season (plan, workouts and analytics) will be closed and kept in the Viewing list. The new season starts with empty analytics.</p><div class="row"><div><label>New season name</label><input data-ns="name" value="${esc(nsf.name)}"></div><div><label>Start date (Monday)</label><input type="date" data-ns="start" value="${nsf.start}"></div><div><label>Weeks</label><input data-ns="weeks" data-n inputmode="numeric" value="${esc(nsf.weeks)}"></div></div><button class="ok" data-a="nsgo">Close current season and start new</button><button class="sec" data-a="nsx">Cancel</button>`;
+else h+=`<p class="mu">Finished this season? Close it and start a new one. All old data stays saved.</p><button class="ok" data-a="nso">Start new season</button>`;
+return h+`</div>`}
+function vSeason(){const S=curS(),ro=S!==st,sid=ro?S.id:st.sid,act={};
+st.saved.filter(w=>w.sid===sid).forEach(w=>{const n=Math.floor((Date.parse(w.date+"T00:00:00Z")-Date.parse(S.start+"T00:00:00Z"))/864e5);if(!(n>=0&&n<S.weeks.length*7))return;
+zsum(w).forEach(([z,m])=>{act[w.date]=act[w.date]||{};act[w.date][z]=(act[w.date][z]||0)+m})});
+const did=(dt,z)=>!!(act[dt]&&act[dt][z]>0),tz={},wk=[];let days=0;
+Object.keys(act).forEach(d=>{let t=0;Object.entries(act[d]).forEach(([z,m])=>{tz[z]=(tz[z]||0)+m;t+=m});if(t>0)days++});
+S.weeks.forEach((w,i)=>wk.push(w.days.reduce((a,d,j)=>a+Object.values(act[addDays(S.start,i*7+j)]||{}).reduce((b,c)=>b+c,0),0)));
+const tot=Object.values(tz).reduce((a,b)=>a+b,0),mx=Math.max(1,...Object.values(tz)),wm=Math.max(1,...wk);
+let h=seasonBar();
+if(ro)h+=`<div class="card"><h2>${esc(S.name||"Closed season")}</h2><p class="mu">Championship date: ${S.champ||"-"} · Start: ${S.start} · Weeks: ${S.weeks.length} · Closed: ${S.closed}</p></div>`;
+else{const cd=st.champ?Math.ceil((new Date(st.champ+"T00:00:00Z")-new Date(today()+"T00:00:00Z"))/6048e5):null;
+h+=`<div class="card"><h2>Current Championship</h2><div class="row"><div><label>Championship name</label><input data-p="name" value="${esc(st.name)}"></div>
+<div><label>Championship date</label><input type="date" data-p="champ" data-r value="${st.champ}"></div>
+<div><label>Season start</label><input type="date" data-p="start" data-r value="${st.start}"></div></div>
+<p class="mu">Weeks run Monday to Sunday. Weeks: ${st.weeks.length}${cd!==null?(cd>0?" · "+cd+" weeks to championship":" · championship date has passed"):""}</p>
+<p class="mu">Plan the training intensity zones for each day: tap a cell to shade or clear a zone (blue). Zones you trained in saved workouts are shaded navy automatically. Distances in metres appear under each week and in the season analytics.</p>
+<button class="pri" data-a="aw">+ Week</button><button class="sec" data-a="dw">− Week</button><button class="sec" data-a="fit">Fit weeks to championship date</button></div>`}
+h+=`<h3>Season analytics</h3><div class="kp"><div>Total distance<b>${tot} m</b></div><div>Training days<b>${days}</b></div><div>Average per day<b>${days?Math.round(tot/days):0} m</b></div></div>
+<div class="card"><h2>Distance by intensity (m)</h2>${ZN.map(z=>`<div class="br"><span>${z}</span><div><i style="width:${(tz[z]||0)/mx*100}%"></i></div><span>${tz[z]||0}</span></div>`).join("")}</div>
+<div class="card"><h2>Weekly distance (m)</h2>${wk.map((t,i)=>`<div class="br"><span>Week ${i+1} · ${addDays(S.start,i*7).slice(5)}</span><div><i style="width:${t/wm*100}%"></i></div><span>${t}</span></div>`).join("")}</div>
+<h3>Weeks: plan and distances</h3>`;
+S.weeks.forEach((w,i)=>{const s0=addDays(S.start,i*7),e0=addDays(S.start,i*7+6),
+ds=w.days.map((d,j)=>{const dt=addDays(S.start,i*7+j);return{dt,d,j,pl:new Set([...d.e.map(x=>x.z).filter(Boolean),...Object.keys(act[dt]||{})]),a:act[dt]||{}}}),
+uc=ZN.map(z=>[z,ds.filter(r=>r.pl.has(z)).length]).filter(a=>a[1]),un=uc.reduce((a,b)=>a+b[1],0),cm=Object.fromEntries(uc),cols=ZN.filter(z=>ds.some(r=>r.pl.has(z))),ct={};
+h+=`<details data-wk="${i}"${op.has(i)?" open":""}><summary><span>Week ${i+1} <span class="mu">${s0.slice(5)} to ${e0.slice(5)}</span></span><span class="mu">${un} unit${un===1?"":"s"} · ${wk[i]} m</span></summary><div class="days"><div class="mu">Units per load</div><table class="utb"><tr>${ZN.map(z=>`<th>${zh(z)}</th>`).join("")}<th>Total</th></tr><tr>${ZN.map(z=>`<td>${cm[z]||0}</td>`).join("")}<td>${un}</td></tr></table><table class="gridt"><tr><th class="c1">Day</th>${ZN.map(z=>`<th>${zh(z)}</th>`).join("")}</tr>`;
+ds.forEach(r=>{h+=`<tr><td class="c1"><b>${DN[dow(r.dt)].slice(0,3)}</b><div class="mu">${r.dt.slice(5)}</div></td>${ZN.map(z=>`<td class="g"${ro?"":` data-a="tz" data-i="${i}" data-j="${r.j}" data-z="${z}"`}><div class="sq${r.d.e.some(x=>x.z===z)?" on":""}${did(r.dt,z)?" did":""}"></div></td>`).join("")}</tr>`});
+h+=`</table><div class="mu">Distance by day (m)</div>`;
+if(cols.length){cols.forEach(z=>ct[z]=0);let gt=0;
+h+=`<table class="wtb"><tr><th>Day</th>${cols.map(z=>`<th>${zh(z)}</th>`).join("")}<th>Total</th></tr>`;
+ds.forEach(r=>{let rt=0;h+=`<tr><td class="d1"><b>${DN[dow(r.dt)].slice(0,3)}</b><span>${r.dt.slice(5)}</span></td>`+cols.map(z=>{const m=r.a[z]||0;ct[z]+=m;rt+=m;return r.pl.has(z)?`<td><b>${m}</b></td>`:`<td>${m||"-"}</td>`}).join("")+`<td>${rt||"-"}</td></tr>`;gt+=rt});
+h+=`<tr><td class="d1"><b>Total</b></td>${cols.map(z=>`<td><b>${ct[z]}</b></td>`).join("")}<td><b>${gt}</b></td></tr></table><p class="mu" style="margin:0">Bold numbers are zones shaded in the grid above for that day (planned or trained).</p>`}
+else h+=`<div class="mu">No zones shaded and no distances yet.</div>`;
+h+=`</div></details>`});
+const wl=st.saved.map((w,i)=>({w,i})).filter(o=>o.w.sid===sid).sort((a,b)=>a.w.date.localeCompare(b.w.date));
+h+=`<div class="card" style="margin-top:14px"><h2>Workouts in this season (${wl.length})</h2>`+(wl.length?wl.map(o=>`<div class="dh" style="border-bottom:1px solid var(--bd);padding:8px 0;align-items:center"><span><b>${o.w.date}</b> · ${esc(o.w.team||"Workout")} · ${wsum(o.w)} m${wsec(o.w)?" · "+fdur(wsec(o.w)):""}</span><button class="sec" style="margin:0;padding:6px 12px" data-a="vwa" data-k="${o.i}">View</button></div>`).join(""):`<div class="mu">No workouts saved in this season yet.</div>`)+`</div>`;
+return h}
+const EVS=["50 Free","100 Free","200 Free","400 Free","800 Free","1500 Free","50 Back","100 Back","200 Back","50 Fly","100 Fly","200 Fly","50 Breast","100 Breast","200 Breast","200 IM","400 IM"];
+const evOrd=e=>{const s=String(e||"").toLowerCase();return[/free/.test(s)?0:/back/.test(s)?1:/fly|butter/.test(s)?2:/breast/.test(s)?3:/\bim\b|medley/.test(s)?4:5,parseInt(s)||9999]};
+const evCmp=(a,b)=>{const x=evOrd(a),y=evOrd(b);return x[0]-y[0]||x[1]-y[1]||String(a).localeCompare(String(b))};
+const ptm=v=>{v=String(v||"").trim().replace(",",".");if(!v)return null;const m=v.match(/^(\d+):(\d{1,2})(?:\.(\d{1,2}))?$/);let t;if(m){if(+m[2]>=60)return null;t=(+m[1])*60+(+m[2])+(m[3]?+("0."+m[3]):0)}else if(/^\d+(\.\d{1,2})?$/.test(v))t=+v;else return null;return t>0?Math.round(t*100)/100:null};
+const ftm=t=>{t=Math.round((+t||0)*100);if(!t)return"";const m=Math.floor(t/6000),r=t%6000,sc=Math.floor(r/100),cs=r%100,p=n=>String(n).padStart(2,"0");return(m?m+":"+p(sc):sc)+"."+p(cs)};
+const tparts=t=>{t=Math.round((+t||0)*100);if(!t)return{m:"",s:"",c:""};return{m:Math.floor(t/6000)||"",s:Math.floor(t%6000/100),c:String(t%100).padStart(2,"0")}};
+const tbx=(R,t)=>{const p=tparts(t),a=(k,ph,v)=>`<input data-n data-tp="${k}" data-rp="${R}" inputmode="numeric" maxlength="2" placeholder="${ph}" lang="en" dir="ltr" value="${v}">`;return a("m","min",p.m)+":"+a("s","sec",p.s)+"."+a("c","00",p.c)};
+const evk=e=>String(e||"").trim().replace(/\s+/g," ").toLowerCase();
+const ageOf=b=>{b=+b;const y=new Date().getFullYear();return b>=1900&&b<=y?y-b:""};
+const softRender=()=>setTimeout(()=>{const a=document.activeElement;if(!a||!a.closest||!a.closest(".swb"))render()},0);
+function bests(x){const m={};x.res.forEach(r=>{const k=evk(r.ev);if(!k||!(+r.t>0))return;const o=m[k];if(!o||r.t<o.t||(r.t===o.t&&(r.d||"")<(o.d||"")))m[k]={k,ev:o?o.ev:String(r.ev).trim().replace(/\s+/g," "),t:+r.t,d:r.d||"",c:r.c||""}});return m}
+function chart(x,k){const pts=x.res.map((r,i)=>({t:+r.t,d:r.d||"",i,k:evk(r.ev),ev:String(r.ev).trim()})).filter(p=>p.k===k&&p.t>0).sort((a,b)=>a.d.localeCompare(b.d)||a.i-b.i);if(!pts.length)return"";
+const W=320,H=150,L=48,R=12,T=14,B=28,ts=pts.map(p=>p.t),lo=Math.min(...ts),hi=Math.max(...ts),pd=(hi-lo)||Math.max(lo*.02,1),mn=lo-pd*.2,mx=hi+pd*.2,
+X=i=>L+(pts.length>1?i*(W-L-R)/(pts.length-1):(W-L-R)/2),Y=t=>T+(t-mn)/(mx-mn)*(H-T-B);
+let g="";[mn+(mx-mn)*.1,(mn+mx)/2,mx-(mx-mn)*.1].forEach(v=>{g+=`<line class="g" x1="${L}" x2="${W-R}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}"/><text x="${L-4}" y="${(Y(v)+3).toFixed(1)}" text-anchor="end">${ftm(v)}</text>`});
+const step=Math.ceil(pts.length/6);pts.forEach((p,i)=>{if(i%step===0||i===pts.length-1)g+=`<text x="${X(i).toFixed(1)}" y="${H-10}" text-anchor="middle">${esc(p.d.slice(2))}</text>`});
+g+=`<polyline class="ln" points="${pts.map((p,i)=>X(i).toFixed(1)+","+Y(p.t).toFixed(1)).join(" ")}"/>`;
+const bi=ts.indexOf(lo);pts.forEach((p,i)=>{g+=`<circle class="${i===bi?"bst":"pt"}" cx="${X(i).toFixed(1)}" cy="${Y(p.t).toFixed(1)}" r="${i===bi?5:3.5}"/>`});
+const f=pts[0].t;
+return `<div class="chw"><div class="cht">${esc(pts[0].ev)}</div><svg class="ch" viewBox="0 0 ${W} ${H}">${g}</svg><div class="mu">First ${ftm(f)} → Best ${ftm(lo)}${lo<f?" ("+(lo-f).toFixed(2)+" s)":""} · ${pts.length} result${pts.length>1?"s":""}</div></div>`}
+const qm=x=>{const n=(q.name||"").trim().toLowerCase(),b=(q.birth||"").trim();return(!n||String(x.name||"").toLowerCase().includes(n))&&(!b||String(x.birth||"").includes(b))};
+const stgOf=x=>(x.stage||"").trim()||"No stage";
+const stgSort=(a,b)=>a==="No stage"?1:b==="No stage"?-1:a.localeCompare(b);
+function ordSw(list){const bs={},mn={},sc={};list.forEach(x=>{bs[x.id]=Object.values(bests(x));bs[x.id].forEach(b=>{if(!(b.k in mn)||b.t<mn[b.k])mn[b.k]=b.t})});
+list.forEach(x=>{const v=bs[x.id];sc[x.id]=v.length?v.reduce((a,b)=>a+mn[b.k]/b.t,0)/v.length:-1});
+return list.slice().sort((a,b)=>((+a.birth||9999)-(+b.birth||9999))||sc[b.id]-sc[a.id]||String(a.name||"").localeCompare(String(b.name||"")))}
+function sPanel(){return qo?`<div class="card"><div class="row"><div><label>Swimmer name</label><input data-q="name" lang="en" dir="ltr" value="${esc(q.name)}" placeholder="Type a name"></div><div><label>Birth year</label><input data-q="birth" data-n inputmode="numeric" maxlength="4" lang="en" dir="ltr" value="${esc(q.birth)}" placeholder="yyyy"></div></div><button class="sec" data-a="qc" style="margin:10px 0 0">Clear search</button><div class="mu" style="margin-top:6px">Press Enter or tap outside the box to search by name and birth year.</div></div>`:""}
+function swCard(x,k){const bm=Object.values(bests(x)).sort((a,b)=>evCmp(a.ev,b.ev)),ag=ageOf(x.birth),P=`sw.${k}`;
+const ia=e=>`lang="en" dir="ltr" data-sr ${e}`;
+const all=x.res.map((r,i)=>({r,i})).filter(o=>+o.r.t>0&&evk(o.r.ev)).sort((a,b)=>(a.r.d||"").localeCompare(b.r.d||"")||a.i-b.i);
+let h=`<details class="swd" data-sw="${x.id}"${opS.has(x.id)?" open":""}><summary><span><b>${esc(x.name||"New swimmer")}</b></span><span class="mu">${x.birth||"-"}${ag!==""?" · "+ag+" y":""}</span></summary><div class="swb">
+<div class="swf"><div><label>Name</label><input ${ia(`data-p="${P}.name" value="${esc(x.name)}"`)}></div><div><label>Birth year</label><input ${ia(`data-n inputmode="numeric" maxlength="4" placeholder="yyyy" data-p="${P}.birth" value="${x.birth||""}"`)}></div><div><label>Age</label><input value="${ag}" readonly tabindex="-1"></div></div>
+<div style="margin-top:8px"><label>Stage</label><input list="stl" ${ia(`data-p="${P}.stage" value="${esc(x.stage)}"`)}></div>
+<div class="mu" style="margin:14px 0 4px">Add results: specialty, time (min : sec . hundredths), date and championship</div>`;
+x.res.forEach((r,j)=>{const R=`${P}.res.${j}`;h+=`<div class="rrow"><input list="evl" placeholder="Specialty" ${ia(`data-p="${R}.ev" value="${esc(r.ev)}"`)}><div class="tbx">${tbx(R,r.t)}</div><button class="x" data-a="dr" data-k="${k}" data-r="${j}">✕</button><div class="r2"><input type="date" data-sr data-p="${R}.d" value="${esc(r.d||"")}"><input placeholder="Championship / event" ${ia(`data-p="${R}.c" value="${esc(r.c)}"`)}></div></div>`});
+h+=`<button class="lk" data-a="ar" data-k="${k}">+ Add result</button>`;
+h+=`<div class="mu" style="margin:16px 0 6px">Best time per specialty (automatic: Free, Back, Fly, Breast, then IM; 50, 100, 200...)</div>`;
+h+=bm.length?`<table class="btb"><tr><th>Specialty</th><th>Best</th><th>Date</th><th>Championship</th></tr>${bm.map(b=>`<tr><td><b>${esc(b.ev)}</b></td><td><b>${ftm(b.t)}</b></td><td>${esc(b.d.slice(2))}</td><td>${esc(b.c)}</td></tr>`).join("")}</table>`:`<div class="mu">Add a result to see the best times.</div>`;
+h+=`<div class="mu" style="margin:16px 0 6px">All results: one table per specialty (Free, Back, Fly, Breast, then IM; 50, 100, 200...), oldest to newest</div>`;
+if(!bm.length)h+=`<div class="mu">No results yet.</div>`;
+bm.forEach(b=>{const rows=x.res.map((r,i)=>({r,i})).filter(o=>evk(o.r.ev)===b.k&&+o.r.t>0).sort((a,c)=>(a.r.d||"").localeCompare(c.r.d||"")||a.i-c.i);
+h+=`<div class="cht" style="margin:12px 0 4px">${esc(b.ev)}</div><table class="btb nv"><tr><th>Date</th><th>Time</th><th>Championship</th></tr>${rows.map(o=>`<tr><td>${esc((o.r.d||"").slice(2))}</td><td><b>${ftm(o.r.t)}</b></td><td>${esc(o.r.c)}</td></tr>`).join("")}</table>`});
+h+=(pend&&pend.a==="dsw"&&pend.k===k)?`<div style="margin-top:12px"><span class="mu">Delete this swimmer and all results?</span><button class="rd" data-a="dsw2" data-k="${k}">Yes, delete</button><button class="sec" data-a="cx">Cancel</button></div>`:`<div style="margin-top:12px"><button class="rd" data-a="dsw" data-k="${k}">Delete swimmer</button></div>`;
+return h+`</div></details>`}
+function vSwim(){const G={};st.sw.forEach(x=>{const g=stgOf(x);(G[g]=G[g]||[]).push(x)});
+const stg=Object.keys(G).sort(stgSort),stl=[...new Set(st.sw.map(x=>(x.stage||"").trim()).filter(Boolean))];
+let h=`<datalist id="evl">${EVS.map(e=>`<option value="${e}">`).join("")}</datalist><datalist id="stl">${stl.map(e=>`<option value="${esc(e)}">`).join("")}</datalist><div class="tb2"><button class="ok" data-a="asw" data-s="">+ Add swimmer</button><button class="sec" data-a="qo">Search by name</button></div>`+sPanel();
+if(!st.sw.length)return h+`<div class="card mu">No swimmers yet. Add a swimmer, then write his specialties and times.</div>`;
+let shown=0;
+stg.forEach(sg=>{const list=ordSw(G[sg]).filter(qm);if(!list.length)return;shown+=list.length;
+h+=`<div class="sgh"><div><b>Stage: ${esc(sg)}</b> <span class="mu">${list.length} swimmer${list.length>1?"s":""}</span></div><button class="lk" data-a="asw" data-s="${esc(sg==="No stage"?"":sg)}">+ Add swimmer to this stage</button></div>`+list.map(x=>swCard(x,st.sw.indexOf(x))).join("")});
+if(!shown)h+=`<div class="card mu">No swimmers match this search.</div>`;
+return h}
+function vRank(){const G={};st.sw.forEach(x=>{const sg=stgOf(x);Object.values(bests(x)).forEach(b=>{G[sg]=G[sg]||{};(G[sg][b.k]=G[sg][b.k]||{ev:b.ev,rows:[]}).rows.push({x,b})})});
+let h=`<div class="tb2"><button class="sec" data-a="qo">Search by name</button></div>`+sPanel();
+const stages=Object.keys(G).sort(stgSort);
+if(!stages.length)return h+`<div class="card mu">Rankings appear here automatically from the swimmers' best times.</div>`;
+let shown=0;
+stages.forEach(sg=>{let sh="";
+Object.values(G[sg]).sort((a,b)=>evCmp(a.ev,b.ev)).forEach(g=>{g.rows.sort((a,b)=>a.b.t-b.b.t||(a.b.d||"").localeCompare(b.b.d||""));
+const rows=g.rows.map((r,i)=>({...r,i})).filter(r=>qm(r.x));if(!rows.length)return;shown+=rows.length;
+sh+=`<div class="cht" style="margin:12px 0 4px">${esc(g.ev)}</div><table class="btb"><tr><th>#</th><th>Swimmer</th><th>Birth · Age</th><th>Best</th><th>Date · Championship</th></tr>${rows.map(r=>`<tr><td>${r.i+1}</td><td><b>${esc(r.x.name||"-")}</b></td><td>${r.x.birth||"-"}<div class="mu">${ageOf(r.x.birth)!==""?ageOf(r.x.birth)+" y":""}</div></td><td><b>${ftm(r.b.t)}</b></td><td>${esc(r.b.d.slice(2))}<div class="mu">${esc(r.b.c)}</div></td></tr>`).join("")}</table>`});
+if(sh)h+=`<div class="card"><h2>Stage: ${esc(sg)}</h2>${sh}</div>`});
+if(!shown)h+=`<div class="card mu">No results match this search.</div>`;
+return h}
+function vTrack(){return `<div class="seg"><button class="${trk==="sw"?"on":""}" data-a="trk" data-t="sw">Swimmers</button><button class="${trk==="rank"?"on":""}" data-a="trk" data-t="rank">Rankings</button></div>`+(trk==="rank"?vRank():vSwim())}
+const LG='<span class="lg b"></span>',LN='<span class="lg n"></span>';
+const INFO={
+season:["Season planning &amp; analytics",["<b>One page for the plan and the results:</b> the zones you plan and the zones you train are shaded in the weekly tables, and the metres swum are calculated automatically from your saved workouts. Nothing to type for the distances.","<b>Season card (Viewing):</b> choose the current season or a closed season (read-only). <b>Start new season</b> closes the current season, keeps all its data and starts a new one with empty analytics. A closed season can be deleted from the Viewing list.","<b>Championship card:</b> write the championship name and date and the season start date. Weeks always run Monday to Sunday: a start date is moved to that week's Monday.","<b>+ Week, − Week, Fit weeks to championship date:</b> add or remove weeks, or set the number of weeks from the championship date. Removing a week that has data asks you to press the button again to confirm.","<b>Season analytics:</b> total distance, training days, average per day, distance by intensity and weekly distance for the season you are viewing.","<b>Weeks:</b> every week is a block you can open. Inside it you find Units per load, the weekly table and under it Distance by day (m).","<b>Weekly table:</b> days are on the left and the intensity zones (Rec., EN1, EN2, EN3, SP1, SP2, SP3, Race Pace) are on top. Tap a cell to shade it and tap again to clear it.",LG+"<b>Blue shading</b> = loads you distributed by hand in this page. This is the plan you make in advance.",LN+"<b>Navy shading</b> = zones that were added automatically while you wrote a workout and saved it on the Create workout page. They do not come from the manual distribution you made here.","<b>Navy with a blue ring</b> = the zone was planned by hand (blue) and was also trained in a saved workout.","<b>Units per load:</b> counts the shaded cells for each zone in that week (blue and navy together) and the total.","<b>Distance by day (m):</b> the metres swum in each zone on each day of the week, with day and week totals. Bold numbers are zones shaded in the weekly table for that day; other zones appear only when metres were swum.","<b>Workouts in this season:</b> the list of the season's workouts at the bottom, with a View button for each."]],
+work:["Create workout",["<b>Workout details:</b> team name, date and start time (hour : min). The start time gives the start and end of every group and rest in the View and PDF.","<b>Set group:</b> name, Rounds (how many times the group repeats), Rest between sets, and a Group note. Use ↑ and ↓ to move a group, and Delete group to remove it.","<b>Set:</b> Reps and Distance (with − and + buttons), Rounds, Stroke, Intensity, Time (min : sec per repetition) and a Note. Use ↑ ↓ to reorder, Move to... to send it to another group, and Delete to remove it.","<b>+ Add set, Save group, + Add set group:</b> Save group adds the group to Favourite sets. Rest between groups is written between two groups.","<b>Totals:</b> total distance, total time (including rests) and start - end appear at the bottom.","<b>Save workout:</b> stores the workout in Saved workout. Its metres by zone go to the Season planning & analytics page, and the zones used are shaded navy in the Season planning & analytics page on the workout date. When you open a saved workout to edit, the button becomes Save changes.","<b>New workout</b> clears the page and keeps the team name."]],
+saved:["Saved workout",["<b>Show:</b> choose the current season, a closed season or all seasons. A new season starts with an empty list; old workouts stay in their own season.","<b>Select, Select all, Clear selection, Delete selected:</b> delete several workouts at once after a confirmation.","<b>View:</b> opens the workout in the same layout as the PDF. <b>PDF</b> saves it as a PDF file. <b>Edit</b> opens it in the Create workout page.","<b>Duplicate:</b> copies the workout to a new date. In Copy to you can choose the current season or a closed one, so an old workout can be reused in a new season. The original stays unchanged.","<b>Delete</b> removes the workout. Its metres disappear from Season planning & analytics and its zones from the Season shading."]],
+lib:["Favourite sets",["<b>Create set group:</b> opens a page where you write one group (name, rounds, rest, note and sets), then Save to Favourite sets.","<b>Select</b> one or more groups, then use <b>Add to new workout</b> (starts a new workout with them) or <b>Add to current workout</b> (adds them to the workout you are writing).","<b>Delete selected</b> removes the selected groups after a confirmation. Select all and Clear selection help with long lists.","Groups you save with Save group in the Create workout page also appear here. They are copies, so editing a workout never changes the saved group."]],
+trksw:["Swimmers tracking: Swimmers",["<b>+ Add swimmer:</b> adds a swimmer. Under each Stage heading, <b>+ Add swimmer to this stage</b> adds him directly to that stage.","<b>Search by name:</b> search the swimmers by name and by birth year (also available in Rankings).","<b>Order:</b> swimmers are grouped by Stage. Inside each stage the oldest birth year comes first, then the better performers.","<b>Swimmer window:</b> name, birth year, age (automatic) and stage. Add results with the specialty, the time in minutes, seconds and hundredths, the date and the championship. A navy line separates every result.","<b>Best time per specialty</b> fills automatically, ordered Free, Back, Fly, Breast, then IM, and 50, 100, 200 inside each stroke.","<b>All results:</b> every specialty has its own table, in the same order (Free, Back, Fly, Breast, then IM; 50, 100, 200...), with its results from the oldest to the newest and a navy line between results."]],
+trkrank:["Swimmers tracking: Rankings",["Each Stage has its own card, and each specialty has its own table ordered from the best time to the slowest.","Everything fills automatically from the best times written in the swimmers' windows.","<b>Search by name</b> filters the tables by swimmer name and birth year. The rank numbers stay the real ranks."]]};
+function infoHtml(){const i=INFO[tab==="trk"?"trk"+trk:tab];if(!i)return"";return `<div class="card inf"><h2>About this page: ${i[0]}</h2><ul>${i[1].map(x=>`<li>${x}</li>`).join("")}</ul></div>`}
+const wname=id=>{const w=st.saved.find(v=>v.id===id);return w?(w.team||"Workout"):"Workout"};
+function vWork(){const c=st.cur,gm=!!c.gm,tl0=tline(c),ed=!!(c.id&&st.saved.some(x=>x.id===c.id)),N=c.groups.length;let tot=0;
+const ni=a=>`<input type="text" inputmode="numeric" lang="en" dir="ltr" ${a}>`;
+let h=gm?`<div class="card ed"><b>Creating a favourite set group</b><div class="mu">Write the group, then press Save to Favourite Sets.</div></div>`:(ed?`<div class="card ed"><b>Editing a saved workout</b><div class="mu">Press Save changes when you are done. Season planning & analytics will update.</div><button class="sec" data-a="nw">New workout</button></div>`:"")+`<div class="card"><h2>Workout Details</h2><div class="row"><div><label>Team name</label><input data-p="cur.team" value="${esc(c.team)}"></div><div><label>Date</label><input type="date" data-p="cur.date" value="${c.date}"></div><div><label>Start time (hour : min)</label><div class="tm hmb"><input type="text" inputmode="numeric" lang="en" dir="ltr" maxlength="2" placeholder="hh" data-n data-hm="h" value="${(c.t0||"").split(":")[0]||""}">:<input type="text" inputmode="numeric" lang="en" dir="ltr" maxlength="2" placeholder="mm" data-n data-hm="m" value="${(c.t0||"").split(":")[1]||""}"></div></div></div></div>`;
+c.groups.forEach((g,gi)=>{const gt=gtot(g),M=g.sets.length;tot+=gt;
+h+=`<div class="grp"><div class="gbar"><div class="gr1"><div class="gname"><label>Group</label><input data-p="cur.groups.${gi}.n" value="${esc(g.n)}"></div>${gm?"":`<div class="ctl"><button class="ib up" data-a="mg" data-k="${gi}" data-d="-1" title="Move group up"${gi===0?" disabled":""}>↑</button><button class="ib dn" data-a="mg" data-k="${gi}" data-d="1" title="Move group down"${gi===N-1?" disabled":""}>↓</button><button class="dng sm" data-a="dgrp" data-k="${gi}">Delete group</button></div>`}</div><div class="gr2"><div class="grd"><label>Rounds</label>${ni(`data-n data-r data-p="cur.groups.${gi}.r" value="${g.r||1}"`)}</div><div class="grest"><label>Rest between sets</label><div class="tm">${ni(`placeholder="min" data-n data-r data-p="cur.groups.${gi}.sm" value="${g.sm||""}"`)}:${ni(`placeholder="sec" data-n data-r data-p="cur.groups.${gi}.ss" value="${g.ss||""}"`)}</div></div><div class="gtot">${gt} m${gsec(g)?" · "+fdur(gsec(g)):""}</div></div></div>
+${pend&&pend.a==="dgrp"&&pend.k===gi?`<div class="mnu"><span class="mu">Delete this group?</span><button class="dng" data-a="dg" data-k="${gi}">Yes, delete</button><button class="sec" data-a="cx">Cancel</button></div>`:""}
+<div class="gnote"><label>Group note</label><textarea rows="1" data-p="cur.groups.${gi}.gn">${esc(g.gn||"")}</textarea></div><div class="gsets">`;
+g.sets.forEach((s,si)=>{const P=`cur.groups.${gi}.sets.${si}`,key=`s${gi}.${si}`,tin=(k,ph)=>ni(`placeholder="${ph}" data-n data-p="${P}.${k}" value="${s[k]||""}"`);
+h+=`<div class="set"><div class="sh"><span class="sn">Set ${si+1}</span><span class="stt">${stot(s)} m${stsec(s)?" · "+fdur(stsec(s)):""}</span><div class="ctl"><button class="ib up" data-a="ms" data-g="${gi}" data-k="${si}" data-d="-1" title="Move set up"${si===0?" disabled":""}>↑</button><button class="ib dn" data-a="ms" data-g="${gi}" data-k="${si}" data-d="1" title="Move set down"${si===M-1?" disabled":""}>↓</button>${N>1?`<select class="mvs" data-mv="${gi}.${si}"><option value="">Move to...</option>${c.groups.map((x,j)=>j===gi?"":`<option value="${j}">${j+1}. ${esc(x.n)}</option>`).join("")}</select>`:""}<button class="dng sm" data-a="ds" data-p="cur.groups.${gi}.sets" data-k="${si}">Delete</button></div></div>
+<div class="sb"><div class="sr"><div class="rd2"><div class="f1"><label>Reps</label><div class="st sm"><button data-a="step" data-p="${P}.reps" data-d="-1">−</button>${ni(`data-n data-r placeholder="0" data-p="${P}.reps" value="${s.reps||""}"`)}<button data-a="step" data-p="${P}.reps" data-d="1">+</button></div></div><span class="x2">×</span><div class="f2"><label>Distance (m)</label><div class="st sm"><button data-a="step" data-p="${P}.dist" data-d="-25">−</button>${ni(`data-n data-r placeholder="m" data-p="${P}.dist" value="${s.dist||""}"`)}<button data-a="step" data-p="${P}.dist" data-d="25">+</button></div></div></div>
+<div><label>Rounds (x)</label>${ni(`data-n data-r data-p="${P}.r" value="${s.r||1}"`)}</div>
+<div><label>Stroke</label><select data-p="${P}.stroke">${opt(SK,s.stroke)}</select></div>
+<div><label>Intensity</label><select data-p="${P}.z">${opt(ZN,s.z)}</select></div>
+<div><label>Time (min : sec)</label><div class="tm">${tin("tm","min")}:${tin("ts","sec")}</div></div></div>
+<label>Note</label><textarea rows="1" data-p="${P}.note">${esc(s.note)}</textarea></div></div>`});
+h+=`</div><div class="gfoot"><button class="addset" data-a="as" data-p="cur.groups.${gi}.sets">+ Add set</button>${gm?"":`<button class="ok" data-a="sg" data-k="${gi}">Save group</button>`}</div></div>`;
+if(gi<N-1)h+=`<div class="gcon"><span>Rest between groups</span><div class="tm">${ni(`placeholder="min" data-n data-r data-p="cur.groups.${gi}.gm" value="${g.gm||""}"`)}:${ni(`placeholder="sec" data-n data-r data-p="cur.groups.${gi}.gs" value="${g.gs||""}"`)}</div></div>`});
+h+=(gm?"":`<button class="addgrp" data-a="ag">+ Add set group</button>`)+`<div class="card"><div class="wt"><span>Total distance</span><b>${tot} m</b></div><div class="wt" style="margin-top:6px"><span>Total time</span><b>${fdur(wsec(c))}</b></div>${tl0?`<div class="wt" style="margin-top:6px"><span>Start - end</span><b>${f24(tl0[0].s)} - ${f24(tl0[tl0.length-1].e)}</b></div>`:""}${gm?`<button class="ok" data-a="gsave">Save to Favourite Sets</button><button class="sec" data-a="gcancel">Cancel</button>`:`<button class="pri" data-a="sv">${ed?"Save changes":"Save workout"}</button><button class="sec" data-a="nw">New workout</button><p class="mu">Saved workouts appear in Season planning & analytics by date and intensity zone.</p>`}</div>`;
+return h}
+function srow(x){const t=tstr(x);return `<div class="os"><div class="osr"><span class="osm">${slab(x)}</span><b>${x.stroke}</b><span class="zn">${x.z}</span>${t?`<span class="tt">@ ${t}</span>`:""}<span class="sm">${sct(x)}</span></div>${x.note?`<div class="on">${esc(x.note)}</div>`:""}</div>`}
+const gh=g=>`<div class="ogh"><span>${esc(g.n)}${rr(g)>1?" · x"+rr(g):""}${g.gn?` <span style="font-weight:400;margin-left:8px"><b>Note -</b> ${esc(g.gn)}</span>`:""}</span><span>${gtot(g)} m</span></div>`;
+const sets2=g=>{const rs=rtxt(g.sm,g.ss);return g.sets.map((x,k)=>srow(x)+(rs&&k<g.sets.length-1?`<div class="os rest">Rest ${rs}</div>`:"")).join("")};
+function fw(w,i){const on=selW.has(w.id);let h=`<div class="out${on?" sel":""}"><div class="oh"><div><div class="ot">${esc(w.team||"Workout")}</div><div class="od">${w.date}</div></div><div style="text-align:right"><div class="om">${wsum(w)}<small>m</small></div>${wsec(w)?`<div class="od">${fdur(wsec(w))}</div>`:""}</div></div><div class="ob">`;
+w.groups.forEach((g,gi)=>{const ra=gi<w.groups.length-1?rtxt(g.gm,g.gs):"";h+=gh(g)+sets2(g)+(ra?`<div class="os rest">Rest ${ra} between groups</div>`:"")});
+return h+`</div><div class="oa">${pend&&pend.a==="dup"&&pend.k===i?`<span class="mu">Copy to</span><select id="dups" style="width:auto;margin-left:6px"><option value="cur">Current season</option>${st.seasons.map(x=>`<option value="${x.id}">${esc(slabel(x))}</option>`).join("")}</select><input type="date" id="dupd" value="${today()}" style="width:auto;margin-left:6px"><button class="pri" data-a="dup2" data-k="${i}">Create copy</button><button class="sec" data-a="cx">Cancel</button>`:pend&&pend.a==="dsv"&&pend.k===i?`<span class="mu">Delete this workout?</span><button class="dng" data-a="dsv2" data-k="${i}">Yes, delete</button><button class="sec" data-a="cx">Cancel</button>`:`<button class="${on?"pri":"sec"}" data-a="tw" data-k="${i}">${on?"✓ Selected":"Select"}</button><button class="sec" data-a="vw" data-k="${i}">View</button><button class="sec" data-a="pdf" data-k="${i}">PDF</button><button class="sec" data-a="ld" data-k="${i}">Edit</button><button class="sec" data-a="dup" data-k="${i}">Duplicate</button><button class="dng" data-a="dsv" data-k="${i}">Delete</button>`}</div></div>`}
+function zsum(w){const t={};w.groups.forEach(g=>g.sets.forEach(x=>{if(x.z)t[x.z]=(t[x.z]||0)+stot(x)*rr(g)}));return ZN.filter(z=>t[z]>0).map(z=>[z,t[z]])}
+const gnh=g=>g.gn?`<span class="pn"><b>Note -</b> ${esc(g.gn)}</span>`:"";
+function vSheet(w,i){const tl=tline(w),zs=zsum(w),sn=w.groups.reduce((a,g)=>a+g.sets.length,0);
+let h=`<div class="sbar"><button class="sec" data-a="vb">← Back</button><button class="pri" data-a="pdf" data-k="${i}">PDF</button><button class="sec" data-a="ld" data-k="${i}">Edit</button></div><div class="pdfw"><div class="pv"><div class="pv-l">SWIM HUB</div><div class="pv-t">${esc(w.team||"Workout")}</div><div class="pv-d">${w.date}${tl?" · "+f24(tl[0].s)+" – "+f24(tl[tl.length-1].e):""}</div>
+<div class="pv-s"><div><b>${wsum(w)} m</b><span>Distance</span></div><div><b>${wsec(w)?fdur(wsec(w)):"-"}</b><span>Time</span></div><div><b>${w.groups.length}</b><span>Groups</span></div><div><b>${sn}</b><span>Sets</span></div></div>
+${zs.length?`<div class="pv-z">${zs.map(([z,m])=>z+" "+m+" m").join("   |   ")}</div>`:""}`;
+w.groups.forEach((g,gi)=>{const rs=rtxt(g.sm,g.ss),ra=gi<w.groups.length-1?rtxt(g.gm,g.gs):"";h+=`<div class="pv-g"><span><span class="u">${esc(g.n)}${rr(g)>1?"  x"+rr(g):""}${tl?" · "+f24(tl[gi].s)+" – "+f24(tl[gi].e):""}</span>${gnh(g)}</span><span>${gtot(g)} m</span></div><div class="pv-c">`+g.sets.map((x,k)=>{const t=tstr(x);return `<div class="pv-r"><span class="a">${slab(x)}</span><span class="b">${esc(x.stroke)}</span><span class="c">${esc(x.z)}</span><span class="d">${t?"@ "+t:""}</span><span class="e">${sct(x)}</span>${x.note?`<div class="n">${esc(x.note)}</div>`:""}</div>`+(rs&&k<g.sets.length-1?`<div class="pv-rest">Rest ${rs}</div>`:"")}).join("")+`</div>`+(ra?`<div class="pv-gr">Rest ${ra} between groups${tl&&tl[gi].ra?" · "+f24(tl[gi].ra.s)+" – "+f24(tl[gi].ra.e):""}</div>`:"")});
+return h+`</div></div>`}
+const visSaved=()=>st.saved.map((w,i)=>({w,i})).filter(o=>sf==="all"||(sf==="cur"?o.w.sid===st.sid:o.w.sid===sf));
+function vSaved(){if(view){const i=st.saved.findIndex(w=>w.id===view);if(i>=0)return vSheet(st.saved[i],i);view=null}
+const vis=visSaved(),n=vis.filter(o=>selW.has(o.w.id)).length;
+let h=`<div class="card"><h2>Saved workout</h2><div class="row"><div><label>Show</label><select data-sf><option value="cur"${sf==="cur"?" selected":""}>Current season</option>${st.seasons.map(x=>`<option value="${x.id}"${sf===x.id?" selected":""}>${esc(slabel(x))}</option>`).join("")}<option value="all"${sf==="all"?" selected":""}>All seasons</option></select></div></div><div class="mu" style="margin-top:8px">${vis.length} shown · ${n} selected</div>`;
+if(vis.length){h+=pend&&pend.a==="delsel"?`<span class="mu">Delete ${n} workout${n>1?"s":""}?</span><button class="dng" data-a="delsel2">Yes, delete</button><button class="sec" data-a="cx">Cancel</button>`:`<button class="sec" data-a="swa">Select all</button><button class="sec" data-a="swc">Clear selection</button><button class="dng" data-a="delsel">Delete selected (${n})</button>`}
+h+=`</div>`;
+return h+(vis.length?vis.map(o=>fw(o.w,o.i)).join(""):`<div class="card mu">No saved workouts here yet. Write a workout and press Save workout.</div>`)}
+
+function vGroups(){const n=st.lib.filter(g=>sel.has(g.id)).length;
+let h=`<div class="card"><h2>Favourite sets</h2><p class="mu">Create a set group here, or save one from the Create workout page with Save group. Select groups to add them to a new or current workout, or to delete them.</p><div class="mu">${st.lib.length} saved · ${n} selected</div><div class="tri2">`+(pend&&pend.a==="dls"?`<span class="mu">Delete ${n} group${n>1?"s":""}?</span><button class="rd" data-a="dls2">Yes, delete</button><button class="sec" data-a="cx">Cancel</button>`:`<button class="ok" data-a="cgrp">Create set group</button><button class="rd" data-a="dls">Delete selected</button>`)+`</div><div class="tri2"><button class="pri" data-a="nfg">Add to new workout</button><button class="pri" data-a="afg">Add to current workout</button></div>`+(st.lib.length?`<div style="margin-top:10px"><button class="sec" data-a="lsa" style="margin:0 8px 0 0">Select all</button><button class="sec" data-a="lsc" style="margin:0">Clear selection</button></div>`:"")+`</div>`;
+if(!st.lib.length)return h+`<div class="card mu">No saved groups yet.</div>`;
+st.lib.forEach((g,i)=>{const on=sel.has(g.id);
+h+=`<div class="out${on?" sel":""}"><div class="ob">${gh(g)}${sets2(g)}</div><div class="oa">${pend&&pend.a==="dlib"&&pend.k===i?`<span class="mu">Delete this group?</span><button class="dng" data-a="dlib2" data-k="${i}">Yes, delete</button><button class="sec" data-a="cx">Cancel</button>`:`<button class="${on?"pri":"sec"}" data-a="tg" data-k="${i}">${on?"✓ Selected":"Select"}</button><button class="dng" data-a="dlib" data-k="${i}">Delete</button>`}</div></div>`});
+return h}
+async function pdfw(w){if(!window.jspdf)return toast("PDF library is still loading. Try again in a few seconds.");
+const J=window.jspdf.jsPDF,PW=380,M=14,CW=PW-2*M,GR=[142,142,147],DK=[0,0,0],MD=[60,60,67],BL=[23,96,165];
+const tl=tline(w),X1=M+10,X2=M+92,X3=M+142,X4=M+222,XR=M+CW-10,NW=XR-X2;
+const mt=new J({unit:"pt",format:[PW,800]});mt.setFont("helvetica","normal");mt.setFontSize(8.5);
+const zs=zsum(w),zl=zs.length?mt.splitTextToSize(zs.map(([z,m])=>z+" "+m+" m").join("   |   "),CW-8):[];
+const lay=(segs,maxW)=>{const L=[[]];let x=0;segs.forEach(sg=>{mt.setFont("helvetica",sg.f);mt.setFontSize(8);const sp=mt.getTextWidth(" ");String(sg.t).split(" ").filter(Boolean).forEach(wd=>{const ww=mt.getTextWidth(wd);if(x>0&&x+ww>maxW){L.push([]);x=0}L[L.length-1].push({t:wd,x,f:sg.f,c:sg.c});x+=ww+sp})});return L};
+const grs=w.groups.map((g,gi)=>{mt.setFont("helvetica","normal");mt.setFontSize(8.5);const rs=rtxt(g.sm,g.ss),rows=[];g.sets.forEach((x,k)=>{const nl=x.note?mt.splitTextToSize(x.note,NW):[];rows.push({x,nl,h:nl.length?24+nl.length*10:22});if(rs&&k<g.sets.length-1)rows.push({rest:"Rest "+rs,h:16})});const lab=lay([{t:(g.n+(rr(g)>1?"  x"+rr(g):"")).toUpperCase()+(tl?"  ·  "+f24(tl[gi].s)+" - "+f24(tl[gi].e):""),f:"bold",c:GR}].concat(g.gn?[{t:"Note -",f:"bold",c:MD},{t:g.gn,f:"normal",c:MD}]:[]),CW-62);return{g,rows,lab,ra:gi<w.groups.length-1?rtxt(g.gm,g.gs):""}});
+let H=152+(zl.length?zl.length*11+4:0)+14;grs.forEach(o=>{H+=8+10*o.lab.length+o.rows.reduce((a,r)=>a+r.h,0)+14+(o.ra?16:0)});
+const doc=new J({unit:"pt",format:[PW,Math.ceil(H)]}),col=c=>doc.setTextColor(c[0],c[1],c[2]);
+doc.setFillColor(242,242,247);doc.rect(0,0,PW,H+10,"F");
+let y=34;col(GR);doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.text("SWIM HUB",M+4,y);y+=26;
+col(DK);doc.setFontSize(22);doc.text(doc.splitTextToSize(w.team||"Workout",CW-8)[0],M+4,y);y+=16;
+col(GR);doc.setFont("helvetica","normal");doc.setFontSize(10);doc.text((w.date||"")+(tl?"  ·  "+f24(tl[0].s)+" - "+f24(tl[tl.length-1].e):""),M+4,y);y+=14;
+doc.setFillColor(255,255,255);doc.roundedRect(M,y,CW,48,8,8,"F");
+[[wsum(w)+" m","Distance"],[wsec(w)?fdur(wsec(w)):"-","Time"],[String(w.groups.length),"Groups"],[String(w.groups.reduce((a,g)=>a+g.sets.length,0)),"Sets"]].forEach((c,i)=>{const x=M+10+i*(CW/4);
+col(DK);doc.setFont("helvetica","bold");doc.setFontSize(14);doc.text(c[0],x,y+23);col(GR);doc.setFont("helvetica","normal");doc.setFontSize(8);doc.text(c[1],x,y+37);
+if(i<3){doc.setDrawColor(229,229,234);doc.line(M+(i+1)*(CW/4),y+9,M+(i+1)*(CW/4),y+39)}});
+y+=48+14;
+if(zl.length){col(MD);doc.setFont("helvetica","normal");doc.setFontSize(8.5);zl.forEach(l=>{doc.text(l,M+4,y+8);y+=11});y+=4}
+grs.forEach((o,gi)=>{const g=o.g;
+o.lab.forEach((ln,k)=>ln.forEach(wd=>{doc.setFont("helvetica",wd.f);doc.setFontSize(8);col(wd.c);doc.text(wd.t,M+4+wd.x,y+10+k*10)}));col(GR);doc.setFont("helvetica","bold");doc.setFontSize(8);doc.text(gtot(g)+" m",M+CW-4,y+10,{align:"right"});y+=8+10*o.lab.length;
+const h=o.rows.reduce((a,r)=>a+r.h,0);doc.setFillColor(255,255,255);doc.roundedRect(M,y,CW,h,8,8,"F");
+let yy=y;o.rows.forEach((r,k)=>{if(r.rest){doc.setFillColor(247,247,250);doc.rect(M,yy,CW,r.h,"F");doc.setDrawColor(229,229,234);doc.line(M,yy,M+CW,yy);doc.line(M,yy+r.h,M+CW,yy+r.h);doc.setFont("helvetica","italic");doc.setFontSize(8);col(GR);doc.text(r.rest,PW/2,yy+11,{align:"center"});yy+=r.h;return}
+const x=r.x,t=tstr(x);
+if(k&&!o.rows[k-1].rest){doc.setDrawColor(229,229,234);doc.line(M+10,yy,M+CW,yy)}
+col(DK);doc.setFont("helvetica","bold");doc.setFontSize(12.5);doc.text(slab(x),X1,yy+15);
+doc.setFontSize(10);doc.text(x.stroke,X2,yy+15);
+doc.setFont("helvetica","normal");doc.setFontSize(9);col(MD);doc.text(x.z,X3,yy+15);
+if(t){doc.setFont("helvetica","bold");doc.setFontSize(10);col(BL);doc.text("@ "+t,X4,yy+15)}
+doc.setFont("helvetica","normal");doc.setFontSize(9.5);col(GR);doc.text(sct(x),XR,yy+15,{align:"right"});
+if(r.nl.length){doc.setFontSize(8.5);col([108,108,112]);r.nl.forEach((l,i)=>doc.text(l,X2,yy+27+i*10))}
+yy+=r.h});
+if(o.ra){col(GR);doc.setFont("helvetica","italic");doc.setFontSize(8);doc.text("Rest "+o.ra+" between groups"+(tl&&tl[gi].ra?"  ·  "+f24(tl[gi].ra.s)+" - "+f24(tl[gi].ra.e):""),PW/2,y+h+12,{align:"center"})}
+y+=h+14+(o.ra?16:0)});
+const fname=(w.team||"workout").replace(/[^A-Za-z0-9_-]+/g,"_")+"_"+(w.date||"")+".pdf";
+if(typeof claude==="undefined"){const u=URL.createObjectURL(doc.output("blob")),a=document.createElement("a");a.href=u;a.download=fname;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);return}
+try{const dl=await claude.use("downloads");if(!dl)return toast("Saving files is not available here.");
+await dl.save({filename:(w.team||"workout").replace(/[^A-Za-z0-9_-]+/g,"_")+"_"+(w.date||"")+".pdf",data:doc.output("blob")})}catch(e){if(!e||e.code!=="declined")toast("Could not save the PDF.")}}
+const clean=(v,n)=>{v=v.replace(/[٠-٩]/g,c=>"٠١٢٣٤٥٦٧٨٩".indexOf(c)).replace(/[۰-۹]/g,c=>"۰۱۲۳۴۵۶۷۸۹".indexOf(c)).replace(/[\u0600-\u06FF\u0750-\u077F]/g,"");return n?v.replace(/\D/g,""):v};
+document.addEventListener("input",e=>{const t=e.target;if(!t.matches||!t.matches("input:not([type=date]),textarea"))return;const v=clean(t.value,t.dataset.n!==undefined);if(v!==t.value)t.value=v});
+document.addEventListener("change",e=>{const t=e.target,p=t.dataset&&t.dataset.p;
+if(t.dataset.q!==undefined){q[t.dataset.q]=t.value;render();return}
+if(t.dataset.tp!==undefined){const bx=t.closest(".tbx"),g=k=>bx.querySelector('[data-tp="'+k+'"]'),rp=t.dataset.rp;
+let mi=parseInt(g("m").value)||0,sc=parseInt(g("s").value)||0,cs=parseInt(g("c").value)||0;
+if(sc>59){toast("Seconds must be between 0 and 59.");sc=0;g("s").value=""}
+if(cs>99){toast("Hundredths must be between 0 and 99.");cs=0;g("c").value=""}
+setp(rp+".t",Math.round((mi*60+sc+cs/100)*100)/100);save();softRender();return}
+if(t.dataset.vs!==undefined){vs=t.value||null;nsf=null;save();render();return}
+if(t.dataset.sf!==undefined){sf=t.value;selW.clear();render();return}
+if(t.dataset.ns!==undefined){if(nsf)nsf[t.dataset.ns]=t.value;return}
+if(t.dataset&&t.dataset.mv!==undefined){if(t.value==="")return;const[gi,si]=t.dataset.mv.split(".").map(Number),G=st.cur.groups,to=+t.value,[s]=G[gi].sets.splice(si,1);G[to].sets.push(s);if(!G[gi].sets.length)G[gi].sets.push(ns());mn=null;save();render();return toast("Set moved to group "+(to+1)+".")}
+if(t.dataset&&t.dataset.hm!==undefined){const bx=t.closest(".hmb"),hi=bx.querySelector('[data-hm="h"]'),mi=bx.querySelector('[data-hm="m"]');let h=hi.value.trim(),m=mi.value.trim();
+if(h!==""&&+h>23){toast("Hour must be between 0 and 23.");h="";hi.value=""}
+if(m!==""&&+m>59){toast("Minutes must be between 0 and 59.");m="";mi.value=""}
+const pd=n=>String(n).padStart(2,"0");st.cur.t0=h===""?"":pd(+h)+":"+pd(+(m||0));save();
+setTimeout(()=>{const a=document.activeElement;if(!a||!a.closest||!a.closest(".hmb"))render()},0);return}
+if(!p)return;
+if(t.dataset.tt!==undefined){const v=t.value.trim(),sec=ptm(v);if(v&&sec==null){toast("Enter the time like 1:02.50 or 58.40.");t.value="";setp(p,0)}else{setp(p,sec||0);t.value=sec?ftm(sec):""}save();softRender();return}
+if(t.dataset.sr!==undefined){setp(p,t.dataset.n!==undefined?(+t.value||0):t.value);save();softRender();return}
+if(t.dataset.t24!==undefined){const v=t.value.trim(),sec=p24(v);if(v&&sec==null){toast("Enter the time as HH:MM, for example 17:30.");t.value="";setp(p,"")}else setp(p,v?f24(sec).slice(0,5):"");save();return render()}
+if(p==="start"){if(t.value)st.start=mon(t.value);save();return render()}
+setp(p,t.dataset.n!==undefined?(+t.value||0):t.value);save();if(t.dataset.r!==undefined)render()});
+document.addEventListener("toggle",e=>{const t=e.target;if(t.dataset&&t.dataset.wk!==undefined){t.open?op.add(+t.dataset.wk):op.delete(+t.dataset.wk)}if(t.dataset&&t.dataset.sw!==undefined){t.open?opS.add(t.dataset.sw):opS.delete(t.dataset.sw)}},true);
+const goTop=()=>setTimeout(()=>window.scrollTo({top:0,behavior:"smooth"}),60),cp=o=>JSON.parse(JSON.stringify(o));
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,p=b.dataset.p,k=+b.dataset.k;
+if(!["dsv","dw","fit","dlib","delsel","dup","dgrp","dls","dsn","dsw"].includes(a))pend=null;
+if(a!=="mn")mn=null;
+if(a==="team"){team=b.dataset.t;st=T[team];if(b.dataset.go)tab="season";view=null;vs=st.vs||null;nsf=null;sf="cur";lk="";trk="sw";ifo=false;q={name:"",birth:""};qo=false;sel.clear();selW.clear();mn=null;pend=null;mo=false;window.scrollTo(0,0);save();return render()}
+if(a==="menu"||a==="mclose"){mo=a==="menu"?!mo:false;return renderMenu()}
+if(a==="tab"){tab=b.dataset.t;mo=false;view=null;ifo=false;window.scrollTo(0,0);return render()}
+if(a==="pdf")return void pdfw(st.saved[k]);if(a==="pdfc")return void pdfw(st.cur);
+if(a==="aw")st.weeks.push(nw());
+else if(a==="dw"){if(st.weeks.length<2)return;if(has(st.weeks.length-1)&&!(pend&&pend.a==="dw")){pend={a:"dw"};return toast("The last week has data. Press − Week again to confirm.")}pend=null;st.weeks.pop()}
+else if(a==="fit"){if(!st.champ)return toast("Enter the championship date first.");
+const n=Math.max(1,Math.ceil((new Date(st.champ+"T00:00:00Z")-new Date(st.start+"T00:00:00Z"))/6048e5));
+if(n<st.weeks.length&&st.weeks.slice(n).some((_,i)=>has(n+i))&&!(pend&&pend.a==="fit")){pend={a:"fit"};return toast("Some weeks with data will be removed. Press the button again to confirm.")}pend=null;
+while(st.weeks.length<n)st.weeks.push(nw());st.weeks.length=n}
+else if(a==="tz"){const d=st.weeks[+b.dataset.i].days[+b.dataset.j],z=b.dataset.z;d.e=d.e.some(x=>x.z===z)?d.e.filter(x=>x.z!==z):[...d.e.filter(x=>x.z),{z}]}
+else if(a==="ae")getp(p).push({z:""});
+else if(a==="de"){const r=getp(p);r.splice(k,1);if(!r.length)r.push({z:"",m:0})}
+else if(a==="ag")st.cur.groups.push(ng(st.cur.groups.length+1));
+else if(a==="dgrp"){pend={a:"dgrp",k}}
+else if(a==="dg"){st.cur.groups.splice(k,1);if(!st.cur.groups.length)st.cur.groups.push(ng(1))}
+else if(a==="mn"){const m=b.dataset.m;mn=mn===m?null:m}
+else if(a==="ms"){const g=st.cur.groups[+b.dataset.g].sets,j=k+(+b.dataset.d);if(j<0||j>=g.length)return;[g[k],g[j]]=[g[j],g[k]]}
+else if(a==="mg"){const j=k+(+b.dataset.d),g=st.cur.groups;if(j<0||j>=g.length)return;[g[k],g[j]]=[g[j],g[k]]}
+else if(a==="as")getp(p).push(ns());
+else if(a==="ds"){const r=getp(p);r.splice(k,1);if(!r.length)r.push(ns())}
+else if(a==="step")setp(p,Math.max(+b.dataset.min||0,(+getp(p)||0)+(+b.dataset.d)));
+else if(a==="sv"){const c=st.cur;if(!c.id)c.id=rid();const q=cp(c),i=st.saved.findIndex(x=>x.id===c.id);q.sid=i>=0?(st.saved[i].sid||st.sid):st.sid;
+if(i>=0)st.saved[i]=q;else st.saved.unshift(q);
+if(q.sid!==st.sid)toast("Saved. This workout belongs to a past season.");else if(!syncSeason(q))toast("The workout date is invalid or before the season start, so it will not appear in Season planning & analytics.");else toast("Saved to Saved Workouts. Distances appear in Season planning & analytics.")}
+else if(a==="nw"){st.cur={team:st.cur.team,date:today(),groups:[ng(1)]}}
+else if(a==="ld"){st.cur=cp(st.saved[k]);tab="work";goTop();toast("Workout opened for editing at the top.")}
+else if(a==="vw"){view=st.saved[k].id;window.scrollTo(0,0)}
+else if(a==="vb"){view=null;window.scrollTo(0,0)}
+else if(a==="dup"){pend={a:"dup",k}}
+else if(a==="dup2"){const d=$("#dupd").value,tg=$("#dups")?$("#dups").value:"cur";if(!d)return toast("Pick a date first.");const q=cp(st.saved[k]);q.id=rid();q.date=d;q.sid=tg==="cur"?st.sid:tg;st.saved.unshift(q);pend=null;
+if(q.sid!==st.sid)toast("Copy created in the selected past season. The original is unchanged.");else toast(syncSeason(q)?"Copy created in the current season for "+d+". The original is unchanged.":"Copy created, but its date is before the season start, so it will not appear in Season planning & analytics.")}
+else if(a==="dsv"){pend={a:"dsv",k}}else if(a==="cx"){pend=null}
+else if(a==="dsv2"){selW.delete(st.saved[k].id);unsync(st.saved[k].id);st.saved.splice(k,1);pend=null;toast("Workout deleted.")}
+else if(a==="tw"){const id=st.saved[k].id;selW.has(id)?selW.delete(id):selW.add(id)}
+else if(a==="vcur"){vs=null;nsf=null;goTop()}
+else if(a==="vwa"){view=st.saved[k].id;tab="saved";window.scrollTo(0,0)}
+else if(a==="dsn"){pend={a:"dsn"}}
+else if(a==="dsn2"){const id=vs,c=st.saved.filter(w=>w.sid===id).length;st.seasons=st.seasons.filter(x=>x.id!==id);st.saved=st.saved.filter(w=>w.sid!==id);selW.clear();if(sf===id)sf="cur";vs=null;pend=null;goTop();toast("Season deleted"+(c?" with "+c+" workout"+(c>1?"s":""):"")+".")}
+else if(a==="info"){ifo=!ifo;window.scrollTo(0,0)}
+else if(a==="qo"){qo=!qo}
+else if(a==="qc"){q={name:"",birth:""}}
+else if(a==="asw"){const x={id:rid(),name:"",birth:0,stage:b.dataset.s||"",res:[]};st.sw.push(x);opS.add(x.id);q={name:"",birth:""}}
+else if(a==="ar"){st.sw[k].res.push({id:rid(),ev:"",t:0,d:today(),c:""})}
+else if(a==="dr"){st.sw[k].res.splice(+b.dataset.r,1)}
+else if(a==="dsw"){pend={a:"dsw",k}}
+else if(a==="dsw2"){opS.delete(st.sw[k].id);st.sw.splice(k,1);pend=null;toast("Swimmer deleted.")}
+else if(a==="trk"){trk=b.dataset.t}
+else if(a==="nso"){nsf={name:"",start:mon(today()),weeks:"8"}}
+else if(a==="nsx"){nsf=null}
+else if(a==="nsgo"){const wn=Math.min(60,Math.max(1,+nsf.weeks||8));
+st.seasons.unshift({id:st.sid,name:st.name||"Season "+st.start,champ:st.champ,start:st.start,weeks:st.weeks,closed:today()});
+st.sid=rid();st.name=(nsf.name||"").trim();st.champ="";st.start=mon(nsf.start||today());st.weeks=Array.from({length:wn},nw);op=new Set([0]);vs=null;nsf=null;sf="cur";selW.clear();goTop();
+toast("New season started. The old season is kept in the Viewing list.")}
+else if(a==="swa"){visSaved().forEach(o=>selW.add(o.w.id))}
+else if(a==="swc"){selW.clear()}
+else if(a==="delsel"){if(!st.saved.some(w=>selW.has(w.id)))return toast("Select workouts first.");pend={a:"delsel"}}
+else if(a==="delsel2"){const ids=st.saved.filter(w=>selW.has(w.id)).map(w=>w.id);ids.forEach(unsync);st.saved=st.saved.filter(w=>!selW.has(w.id));selW.clear();pend=null;toast(ids.length+" workout"+(ids.length>1?"s":"")+" deleted.")}
+else if(a==="sg"){const g=st.cur.groups[k];st.lib.unshift({id:rid(),n:g.n,r:rr(g),sm:g.sm,ss:g.ss,gn:g.gn,sets:cp(g.sets)});toast("Group saved. Find it in Favourite Sets.")}
+else if(a==="tg"){const id=st.lib[k].id;sel.has(id)?sel.delete(id):sel.add(id)}
+else if(a==="cgrp"){if(!st.cur.gm)st.gbk=st.cur;st.cur={team:st.gbk.team,date:st.gbk.date,groups:[ng(1)],gm:true};tab="work";goTop();toast("Write the group, then press Save to Favourite Sets.")}
+else if(a==="gsave"){const g=st.cur.groups[0];if(!g||!g.sets.some(x=>stot(x)>0))return toast("Add at least one set with reps and distance first.");
+st.lib.unshift({id:rid(),n:g.n,r:rr(g),sm:g.sm,ss:g.ss,gn:g.gn,sets:cp(g.sets)});st.cur=st.gbk||{team:"",date:today(),groups:[ng(1)]};delete st.gbk;tab="lib";goTop();toast("Group created. It is in Favourite Sets now.")}
+else if(a==="gcancel"){st.cur=st.gbk||{team:"",date:today(),groups:[ng(1)]};delete st.gbk;tab="lib";goTop()}
+else if(a==="nfg"||a==="afg"){const g=st.lib.filter(x=>sel.has(x.id)).map(x=>({n:x.n,r:x.r||1,sm:x.sm,ss:x.ss,gn:x.gn,sets:cp(x.sets)}));if(!g.length)return toast("Select a group first.");
+if(st.cur.gm&&st.gbk){st.cur=st.gbk;delete st.gbk}
+if(a==="nfg")st.cur={team:st.cur.team,date:today(),groups:g};else st.cur.groups.push(...g);sel.clear();tab="work";goTop();toast(a==="nfg"?"New workout created from the selected groups.":"Groups added to the workout.")}
+else if(a==="lsa"){st.lib.forEach(g=>sel.add(g.id))}
+else if(a==="lsc"){sel.clear()}
+else if(a==="dls"){if(!st.lib.some(g=>sel.has(g.id)))return toast("Select groups first.");pend={a:"dls"}}
+else if(a==="dls2"){const c=st.lib.filter(g=>sel.has(g.id)).length;st.lib=st.lib.filter(g=>!sel.has(g.id));sel.clear();pend=null;toast(c+" group"+(c>1?"s":"")+" deleted.")}
+else if(a==="dlib"){pend={a:"dlib",k}}
+else if(a==="dlib2"){sel.delete(st.lib[k].id);st.lib.splice(k,1);pend=null;toast("Group deleted.")}
+save();render()});
+try{const v=localStorage.getItem("swim2");if(v)loadAll(v)}catch(e){}
+migrateAll();render();
+
+</script>
+</body>
+</html>
