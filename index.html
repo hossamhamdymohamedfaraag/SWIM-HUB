@@ -20,7 +20,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--nv);z-index:5;padding:12px 14px 0}
 .bar{display:flex;justify-content:space-between;align-items:center;min-height:40px}
 #ttl{color:#fff;font-weight:700;font-size:16px;letter-spacing:.2px}
-#burger{width:42px;height:42px;border:0;background:rgba(255,255,255,.1);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
+.cloud-btn{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:700;min-height:36px}#burger{width:42px;height:42px;border:0;background:rgba(255,255,255,.1);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 #burger i{display:block;width:20px;height:2px;background:#fff;border-radius:1px;transition:.2s}
 #burger.open i:nth-child(1){transform:translateY(7px) rotate(45deg)}
 #burger.open i:nth-child(2){opacity:0}
@@ -312,11 +312,12 @@ th{color:var(--mu);font-weight:700;font-size:12px}
 </style>
 </head>
 <body>
-<header><div class="bar"><span id="ttl"></span><div class="bt"><button id="infob" data-a="info" aria-label="Page info">i</button><button id="burger" data-a="menu" aria-label="Menu"><i></i><i></i><i></i></button></div></div></header>
+<header><div class="bar"><span id="ttl"></span><div class="bt"><button id="cloudBtn" class="cloud-btn" type="button" onclick="window.swimHubCloudLogin&&window.swimHubCloudLogin()">Sign in</button><button id="infob" data-a="info" aria-label="Page info">i</button><button id="burger" data-a="menu" aria-label="Menu"><i></i><i></i><i></i></button></div></div></header>
 <div id="menu"></div>
 <main id="m"></main>
 <div id="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const ZN=["Rec.","EN1","EN2","EN3","SP1","SP2","SP3","Race Pace"],SK=["Free","Back","Breast","Butterfly","IM","MS","Choice"];
 const DN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -333,11 +334,68 @@ const T={pre:mkSt(),comp:mkSt()},TN={pre:"Pre. Team",comp:"Compet. Team"};let te
 const PK=()=>({pre:T.pre,comp:T.comp,team});
 let tab="home",mo=false,view=null,trk="sw",opS=new Set(),lk="",qo=false,q={name:"",birth:""},ifo=false,vs=null,nsf=null,sf="cur",tm=null,op=new Set([0]),pend=null,mn=null,tmo=null,sel=new Set(),selW=new Set();
 const $=s=>document.querySelector(s),esc=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const SUPABASE_URL="https://hjohqolexapikimasvrt.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_0PNnCNCjmj8rzHpbkv4FaA_oWd46koF";
+let sb=null,sbUser=null,cloudReady=false,cloudTimer=null,cloudBusy=false,cloudPaused=false,handledCloudUser="";
+function cloudStatus(label){const b=$("#cloudBtn");if(b)b.textContent=label}
+function localBackup(){try{const raw=localStorage.getItem("swim2");if(raw){const key="swim2_backup_before_cloud_"+Date.now();localStorage.setItem(key,raw);return key}}catch(e){}return null}
+async function cloudWrite(){
+ if(!sb||!sbUser||!cloudReady||cloudPaused||cloudBusy)return false;
+ cloudBusy=true;cloudStatus("Saving…");
+ try{
+  const payload={user_id:sbUser.id,data:PK(),updated_at:new Date().toISOString()};
+  const {error}=await sb.from("coach_data").upsert(payload,{onConflict:"user_id"});
+  if(error)throw error;
+  cloudStatus("Synced ✓");return true;
+ }catch(e){console.error("SWIM HUB cloud save:",e);cloudStatus("Sync error");toast("Cloud save failed. Your data is still saved on this device.");return false;}
+ finally{cloudBusy=false}
+}
+function queueCloudWrite(){if(!cloudReady||cloudPaused)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(cloudWrite,1200)}
+async function handleCloudSession(user){
+ if(!user||!sb)return;
+ if(handledCloudUser===user.id)return;
+ handledCloudUser=user.id;sbUser=user;cloudReady=false;cloudPaused=false;cloudStatus("Checking…");
+ try{
+  const {data:row,error}=await sb.from("coach_data").select("data").eq("user_id",user.id).maybeSingle();
+  if(error)throw error;
+  const backup=localBackup();
+  if(row&&row.data){
+   const useCloud=confirm("A saved SWIM HUB backup was found in your cloud account.\n\nOK = load the cloud data on this device.\nCancel = keep the data currently on this device (cloud sync stays paused).");
+   if(useCloud){loadAll(JSON.stringify(row.data));migrateAll();render();cloudReady=true;cloudStatus("Synced ✓");toast("Cloud data loaded. A local backup was kept.");}
+   else{cloudPaused=true;cloudStatus("Local only");toast("Kept this device's data. Cloud sync is paused to protect it.");}
+  }else{
+   const upload=confirm("No cloud data was found for this account.\n\nUpload the data currently on this device to your cloud account? A local backup will be kept first.");
+   if(upload){cloudReady=true;const ok=await cloudWrite();if(ok)toast("Your SWIM HUB data was uploaded to the cloud.");}
+   else{cloudPaused=true;cloudStatus("Local only");toast("Nothing was uploaded. Your local data is unchanged.");}
+  }
+  if(backup)console.info("Local SWIM HUB backup created:",backup);
+ }catch(e){console.error("SWIM HUB cloud load:",e);cloudReady=false;cloudStatus("Sync error");toast("Could not access cloud data. Your local data is unchanged.");}
+}
+async function initCloud(){
+ try{
+  if(!window.supabase||!window.supabase.createClient){cloudStatus("Offline");return}
+  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+  const {data:{session},error}=await sb.auth.getSession();
+  if(error)throw error;
+  if(session?.user)await handleCloudSession(session.user);else cloudStatus("Sign in");
+  sb.auth.onAuthStateChange((event,session)=>{
+   if(event==="SIGNED_OUT"){sbUser=null;cloudReady=false;cloudPaused=false;handledCloudUser="";cloudStatus("Sign in");}
+   else if(session?.user){setTimeout(()=>handleCloudSession(session.user),0);}
+  });
+ }catch(e){console.error("SWIM HUB auth:",e);cloudStatus("Offline");}
+}
+window.swimHubCloudLogin=async function(){
+ if(!sb){toast("Cloud service is not available. Check your internet connection.");return}
+ if(sbUser){const out=confirm("Sign out of your SWIM HUB cloud account? Your local data will stay on this device.");if(out){await sb.auth.signOut();}return}
+ cloudStatus("Opening…");
+ const {error}=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
+ if(error){console.error(error);cloudStatus("Sign in");toast("Google sign-in could not start. Please try again.");}
+};
+
 const getp=p=>p.split(".").reduce((o,k)=>o[k],st);
 function setp(p,v){const k=p.split("."),l=k.pop();k.reduce((o,x)=>o[x],st)[l]=v}
 function toast(m){const e=$("#toast");e.textContent=m;e.style.display="block";clearTimeout(tmo);tmo=setTimeout(()=>{e.style.display="none"},3500)}
-function save(){st.vs=vs;clearTimeout(tm);tm=setTimeout(async()=>{try{localStorage.setItem("swim2",JSON.stringify(PK()))}catch(e){}
-},500)}
+function save(){st.vs=vs;clearTimeout(tm);tm=setTimeout(()=>{try{localStorage.setItem("swim2",JSON.stringify(PK()))}catch(e){toast("Could not save on this device. Check browser storage.")}queueCloudWrite()},500)}
 const opt=(l,s,ph)=>(ph?`<option value="">${ph}</option>`:"")+l.map(x=>`<option${x===s?" selected":""}>${x}</option>`).join("");
 const has=i=>st.weeks[i].days.some(d=>d.e.some(x=>x.z||x.m));
 const wtot=w=>w.days.reduce((a,d)=>a+d.e.reduce((b,x)=>b+(x.z?+x.m||0:0),0),0);
@@ -684,6 +742,7 @@ else if(a==="dlib2"){sel.delete(st.lib[k].id);st.lib.splice(k,1);pend=null;toast
 save();render()});
 try{const v=localStorage.getItem("swim2");if(v)loadAll(v)}catch(e){}
 migrateAll();render();
+initCloud();
 
 </script>
 </body>
